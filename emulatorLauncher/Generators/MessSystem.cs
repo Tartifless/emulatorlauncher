@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using emulatorLauncher;
 using emulatorLauncher.Tools;
+using System.Xml.Linq;
 
 namespace emulatorLauncher
 {
@@ -44,6 +45,13 @@ namespace emulatorLauncher
                             new MessRomType("flop1" /* .mfi  .dfi  .dsk  .do   .po   .rti  .edd  .woz  .nib */ ),
                         }),
 
+                // Apple 2 GS
+                new MessSystem("apple2gs"     ,"apple2gs" ,new MessRomType[]
+                        {
+                            new MessRomType("flop3", new string[] { "hfe", "mfm", "td0", "imd", "d77", "d88", "1dd", "cqm", "cqi", "ima", "img", "ufi", "360", "ipf", "dc42", "moof", "2mg", "woz" } ),
+                            new MessRomType("flop1" /* .mfi  .dfi  .dsk  .do   .po   .rti  .edd  .nib */ ),
+                        }),
+
                 // Atom;atom;flop1;'*DOS\n*DIR\n*CAT\n*RUN"'
                 new MessSystem("atom"         ,"atom"     , new MessRomType[]
                         {
@@ -81,21 +89,21 @@ namespace emulatorLauncher
                             new MessRomType("flop1", null, "*cat\\n*exec !boot\\n", "3" )
                         }),
 
-                // Camputers LYNX
+                // Camputers LYNX "mload\\\"\\\"\\n" (MLOAD"gamename")
                 new MessSystem("camplynx"     ,"lynx48k"  , new MessRomType[]
                         {
-                            new MessRomType("cass", new string[] { "wav", "tap" }, "mload\\\"\\\"\\n")
+                            new MessRomType("cass", new string[] { "wav", "tap" })
                         }),
 
                 new MessSystem("lynx96k"     ,"lynx96k"  , new MessRomType[]
                         {
-                            new MessRomType("cass", new string[] { "wav", "tap" }, "mload\\\"\\\"\\n"),
+                            new MessRomType("cass", new string[] { "wav", "tap" }),
                             new MessRomType("flop1" )
                         }),
 
                 new MessSystem("lynx128k"     ,"lynx128k"  , new MessRomType[]
                         {
-                            new MessRomType("cass", new string[] { "wav", "tap" }, "mload\\\"\\\"\\n"),
+                            new MessRomType("cass", new string[] { "wav", "tap" }),
                             new MessRomType("flop1" )
                         }),
 
@@ -345,7 +353,6 @@ namespace emulatorLauncher
                 new MessSystem("pegasus"      ,"pegasus"       , "rom1"  ),  // Amber Pegasus
                 new MessSystem("cpc6128p"     ,"cpc6128p"      , "flop1"  ), // Amstrad CPC Plus
                 new MessSystem("apogee"       ,"apogee"        , "cass"  ),  // Apogee BK-01
-                new MessSystem("apple2gs"     ,"apple2gsr1"    , "flop3"  ), // Apple II GS
                 new MessSystem("sv8000"       ,"sv8000"        , "cart"  ),  // Bandai Super Vision 8000
                 new MessSystem("pv2000"       ,"pv2000"        , "cart"  ),  // Casio PV-2000
                 new MessSystem("vic10"        ,"vic10"         , "cart"  ),  // Commodore MAX Machine
@@ -516,8 +523,8 @@ namespace emulatorLauncher
 
             return path;
         }
-        
-        public List<string> GetMameCommandLineArguments(string system, string rom, bool injectCfgDirectory = true)
+
+        public List<string> GetMameCommandLineArguments(string system, string rom, bool injectCfgDirectory = true, string emulator = "libretro")
         {
             List<string> commandArray = new List<string>();
 
@@ -558,6 +565,13 @@ namespace emulatorLauncher
             string inipath = Path.Combine(bios, "mame", "ini", iniFileName + ".ini");
             if (File.Exists(inipath))
                 File.Delete(inipath);
+
+            // Additional arguments for libretro:mame
+            if (emulator == "libretro")
+            {
+                if (SystemConfig.isOptSet("libretro_mame_rotate") && !string.IsNullOrEmpty(SystemConfig["libretro_mame_rotate"]) && SystemConfig["libretro_mame_rotate"] != "off")
+                    commandArray.Add("-" + SystemConfig["libretro_mame_rotate"]);
+            }
 
             // rompath
             commandArray.Add("-rompath");
@@ -603,6 +617,21 @@ namespace emulatorLauncher
             }
 
             // Specific modules for some systems
+            // Apple 2
+            if (system == "apple2")
+            {
+                if (SystemConfig.isOptSet("gameio") && SystemConfig["gameio"] != "none")
+                {
+                    if (SystemConfig["gameio"] == "joyport" && messModel != "apple2p")
+                        throw new ApplicationException(" Joyport only compatible with Apple II +");
+                    else
+                    {
+                        commandArray.Add("-gameio");
+                        commandArray.Add(SystemConfig["gameio"]);
+                    }
+                }
+            }
+
             //BBC Micro Joystick
             if (system == "bbcmicro")
             {
@@ -643,6 +672,37 @@ namespace emulatorLauncher
             if (autoRunCommand != null)
                 commandArray.AddRange(autoRunCommand.Arguments);
 
+            //Specific autostart for Camputers lynx based on hashfile (for now only for MAME standalone)
+            if (emulator == "mame64" && system == "camplynx" && SystemConfig.isOptSet("force_softlist") && !string.IsNullOrEmpty(SystemConfig["force_softlist"]))
+            {
+                string hashfile = Path.Combine(AppConfig.GetFullPath("bios"), "mame", "hash", SystemConfig["force_softlist"] + ".xml");
+                if (File.Exists(hashfile))
+                {
+                    var romname = Path.GetFileNameWithoutExtension(rom);
+
+                    XDocument doc = XDocument.Load(hashfile);
+                    string idToFind = romname;
+                    XElement selectedElement = doc.Descendants()
+                            .Where(x => (string)x.Attribute("name") == idToFind).FirstOrDefault();
+
+                    if (selectedElement != null)
+                    {
+                        XElement commandElement = selectedElement.Descendants()
+                            .Where(x => (string)x.Attribute("name") == "usage").FirstOrDefault();
+
+                        if (commandElement != null)
+                        {
+                            string command = commandElement.Attribute("value").Value + "\\n";
+                            command = command.Replace("\"", "\\\"");
+                            commandArray.Add("-autoboot_delay");
+                            commandArray.Add("3");
+                            commandArray.Add("-autoboot_command");
+                            commandArray.Add(command);
+                        }
+                    }
+                }
+            }
+
             // Additional disks if required
             if (SystemConfig.isOptSet("addblankdisk") && !string.IsNullOrEmpty(SystemConfig["addblankdisk"]))
             {
@@ -682,9 +742,10 @@ namespace emulatorLauncher
             }
 
             // Alternate ROM type for systems with mutiple media (ie cassette & floppy)
-            if (SystemConfig.isOptSet("altromtype"))
+            if (SystemConfig.isOptSet("altromtype") && Path.GetExtension(rom).ToLower() != ".m3u")
                 commandArray.Add("-" + SystemConfig["altromtype"]);
-            else
+            
+            else if (Path.GetExtension(rom).ToLower() != ".m3u")
             {
                 if (Directory.Exists(rom))
                 {
@@ -703,16 +764,71 @@ namespace emulatorLauncher
             if (system == "ti99" && rom.EndsWith(".rpk"))
                 UseFileNameWithoutExtension = false;
 
+            // Specific Managements for multi-disc roms using m3u
+            // Go through the .m3u file and assign each line to a floppy drive
+            if (Path.GetExtension(rom).ToLower() == ".m3u")
+            {
+                List<string> disks = new List<string>();
+                string dskPath = Path.GetDirectoryName(rom);
+
+                foreach (var line in File.ReadAllLines(rom))
+                {
+                    string dsk = Path.Combine(dskPath, line);
+                    if (File.Exists(dsk))
+                        disks.Add(dsk);
+                    else
+                        throw new ApplicationException("File specified in .m3u does not exist");
+                }
+
+                if (disks.Count == 0)
+                    throw new ApplicationException(".m3u file is empty");
+
+                else if (disks.Count == 1)
+                {
+                    var romType = this.GetRomType(disks[0]);
+                    if (!string.IsNullOrEmpty(romType))
+                        commandArray.Add("-" + romType);
+                    commandArray.Add(disks[0]);
+                }
+
+                else if (disks.Count > 1 && system == "apple2gs")
+                {
+                    var romType = this.GetRomType(disks[0]);
+                    if (romType == "flop3")
+                    {
+                        commandArray.Add("-flop3");
+                        commandArray.Add(disks[0]);
+                        commandArray.Add("-flop4");
+                        commandArray.Add(disks[1]);
+                    }
+                    else if (romType == "flop1")
+                    {
+                        commandArray.Add("-flop1");
+                        commandArray.Add(disks[0]);
+                        commandArray.Add("-flop2");
+                        commandArray.Add(disks[1]);
+                    }
+                }
+
+                else if (disks.Count > 1 && system == "apple2")
+                {
+                    commandArray.Add("-flop1");
+                    commandArray.Add(disks[0]);
+                    commandArray.Add("-flop2");
+                    commandArray.Add(disks[1]);
+                }
+            }
+
             // Specific Managements to enable or disable softlist
             // When using softlist, the rom name must match exactly the hash file and be passed to command line without path or extension
-            // A specific softlist can be specified by putting the softlist name before the rom name separated by ":"
-            if (SystemConfig.isOptSet("force_softlist") && SystemConfig["force_softlist"] != "none")
+            else if (SystemConfig.isOptSet("force_softlist") && SystemConfig["force_softlist"] != "none")
             {
                 string softlist = SystemConfig["force_softlist"];
                 rom = softlist + ":" + Path.GetFileNameWithoutExtension(rom);
                 commandArray.Add(rom);
             }
-            
+
+            // Generic case: add rom to command line
             else if (MachineName != "%romname%")
                 commandArray.Add(this.UseFileNameWithoutExtension ? Path.GetFileNameWithoutExtension(rom) : rom);
 

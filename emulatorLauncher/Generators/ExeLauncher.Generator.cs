@@ -54,6 +54,14 @@ namespace emulatorLauncher
                         {
                             rom = exe;
 
+                            if (!string.IsNullOrEmpty(dir))
+                            {
+                                string customDir = Path.Combine(path, dir);
+                                path = Directory.Exists(customDir) ? customDir : Path.GetDirectoryName(rom);
+                            }
+                            else
+                                path = Path.GetDirectoryName(rom);
+
                             if (args.Length > 1)
                                 arguments = string.Join(" ", args.Skip(1).ToArray());
                         }
