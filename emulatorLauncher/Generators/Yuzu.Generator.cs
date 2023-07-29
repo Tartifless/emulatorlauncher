@@ -192,19 +192,14 @@ namespace emulatorLauncher
                 //docked mode
                 if (SystemConfig.isOptSet("yuzu_undock") && SystemConfig.getOptBoolean("yuzu_undock"))
                 {
-                    ini.WriteValue("UI", "use_docked_mode\\default", "false");
-                    ini.WriteValue("UI", "use_docked_mode", "false");
-                    ini.WriteValue("Controls", "use_docked_mode\\default", "false");
-                    ini.WriteValue("Controls", "use_docked_mode", "false");
+                    ini.WriteValue("System", "use_docked_mode\\default", "false");
+                    ini.WriteValue("System", "use_docked_mode", "false");
                 }
                 else if (Features.IsSupported("yuzu_undock"))
                 {
-                    ini.WriteValue("UI", "use_docked_mode\\default", "true");
-                    ini.WriteValue("UI", "use_docked_mode", "true");
-                    ini.WriteValue("Controls", "use_docked_mode\\default", "true");
-                    ini.WriteValue("Controls", "use_docked_mode", "true");
+                    ini.WriteValue("System", "use_docked_mode\\default", "true");
+                    ini.WriteValue("System", "use_docked_mode", "true");
                 }
-
 
                 //disable telemetry
                 ini.WriteValue("WebService", "enable_telemetry\\default", "false");
@@ -226,13 +221,12 @@ namespace emulatorLauncher
                     _gamedirsSize = gameDirsSize;
                     ini.WriteValue("UI", "Paths\\gamedirs\\size", "4");
                 }
-                
-                CreateControllerConfiguration(ini);
 
                 //screenshots path
                 string screenshotpath = AppConfig.GetFullPath("screenshots").Replace("\\", "/") + "/yuzu";
                 if (!string.IsNullOrEmpty(AppConfig["screenshots"]) && Directory.Exists(AppConfig.GetFullPath("screenshots")))
                 {
+                    ini.WriteValue("UI", "Screenshots\\enable_screenshot_save_as\\default", "false");
                     ini.WriteValue("UI", "Screenshots\\enable_screenshot_save_as", "false");
                     ini.WriteValue("UI", "Screenshots\\screenshot_path", screenshotpath);
                 }
@@ -266,13 +260,16 @@ namespace emulatorLauncher
                 BindQtIniFeature(ini, "Renderer", "gpu_accuracy", "gpu_accuracy", "1");
 
                 // Asynchronous shaders compilation (hack)
-                BindQtIniFeature(ini, "Renderer", "use_asynchronous_shaders", "use_asynchronous_shaders", "true");
+                BindQtIniFeature(ini, "Renderer", "use_asynchronous_shaders", "use_asynchronous_shaders", "false");
+
+                // ASTC Compression (non compressed by default, use medium for videocards with 6GB of VRAM and low for 2-4GB VRAM)
+                BindQtIniFeature(ini, "Renderer", "astc_recompression", "astc_recompression", "0");
+
 
                 // CPU accuracy (auto except if the user chooses otherwise)
                 BindQtIniFeature(ini, "Cpu", "cpu_accuracy", "cpu_accuracy", "0");
 
-                // ASTC Compression (non compressed by default, use medium for videocards with 6GB of VRAM and low for 2-4GB VRAM)
-                BindQtIniFeature(ini, "Renderer", "astc_recompression", "astc_recompression", "0");
+                CreateControllerConfiguration(ini);
             }
         }
 
