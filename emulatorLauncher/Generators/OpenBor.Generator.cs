@@ -115,7 +115,8 @@ namespace EmulatorLauncher
             if (_destFile != null && File.Exists(_destFile))
                 File.Delete(_destFile);
 
-            ReshadeManager.UninstallReshader(ReshadeBezelType.opengl, _path);
+            if (_path != null)
+                ReshadeManager.UninstallReshader(ReshadeBezelType.opengl, _path);
 
             base.Cleanup();
         }
