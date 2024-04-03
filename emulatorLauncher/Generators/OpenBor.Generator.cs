@@ -52,9 +52,10 @@ namespace EmulatorLauncher
             }
             catch { }
 
+            _path = path;
+
             if (setupConfigIni(path))
             {
-                _path = path;
                 UseEsPadToKey = false;
 
                 SetupBezelAndShaders(system, rom, resolution, path);
