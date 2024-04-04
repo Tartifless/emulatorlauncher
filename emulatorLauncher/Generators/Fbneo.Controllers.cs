@@ -62,9 +62,11 @@ namespace EmulatorLauncher
 
                     gameMapping.Add(gameName, buttonMap);
                 }
+                else
+                    SimpleLogger.Instance.Info("[INFO] Game not found in mapping file : " + _romName);
             }
 
-            if (gameMapping == null)
+            if (gameMapping == null || gameMapping.Count == 0)
                 return;
 
             // Define number of players
