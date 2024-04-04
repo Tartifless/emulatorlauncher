@@ -200,7 +200,7 @@ namespace EmulatorLauncher
                 tech = "DS4";
             else if (prod == USB_PRODUCT.SONY_DS3)
                 tech = "DS3";
-            else if (ctrl.IsXInputDevice)
+            else if (ctrl.IsXInputDevice && !SystemConfig.getOptBoolean("rpcs3_forceSDL"))
                 tech = "XInput";
 
             //Create Player block titles
