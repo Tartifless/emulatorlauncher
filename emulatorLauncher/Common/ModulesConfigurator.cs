@@ -30,8 +30,6 @@ namespace EmulatorLauncher.Common
             SimpleLogger.Instance.Info("[MODULES] Configuring MarqueeManager");
 
             ScreenResolution marqueeResolution = ScreenResolution.CurrentResolution;
-            string marqueeWidth = marqueeResolution.Width.ToString();
-            string marqueeHeight = marqueeResolution.Height.ToString();
 
             using (var ini = IniFile.FromFile(configFile, IniOptions.UseSpaces))
             {
@@ -44,22 +42,11 @@ namespace EmulatorLauncher.Common
                     ini.WriteValue("Settings", "ScreenNumber", screenIndex.ToString());
                 }
 
-                try 
-                {
-                    marqueeWidth = screen.Bounds.Width.ToString();
-                    marqueeHeight = screen.Bounds.Height.ToString();
-                } 
-                catch { }
-
                 if (Program.SystemConfig.isOptSet("MarqueeWidth") && !string.IsNullOrEmpty(Program.SystemConfig["MarqueeWidth"]))
                     ini.WriteValue("Settings", "MarqueeWidth", Program.SystemConfig["MarqueeWidth"]);
-                else
-                    ini.WriteValue("Settings", "MarqueeWidth", marqueeWidth);
 
                 if (Program.SystemConfig.isOptSet("MarqueeHeight") && !string.IsNullOrEmpty(Program.SystemConfig["MarqueeHeight"]))
                     ini.WriteValue("Settings", "MarqueeHeight", Program.SystemConfig["MarqueeHeight"]);
-                else
-                    ini.WriteValue("Settings", "MarqueeHeight", marqueeHeight);
 
                 if (Program.SystemConfig.isOptSet("MarqueeRA") && Program.SystemConfig.getOptBoolean("MarqueeRA"))
                     ini.WriteValue("Settings", "MarqueeRetroAchievements", "true");
