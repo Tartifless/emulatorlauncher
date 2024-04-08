@@ -508,6 +508,7 @@ namespace EmulatorLauncher
                 generator = generators.Where(g => g.Key == SystemConfig["system"]).Select(g => g.Value()).FirstOrDefault();
 
             LoadControllerConfiguration(args);
+            ModulesConfigurator.ConfigureModules();
 
             if (generator != null)
             {
