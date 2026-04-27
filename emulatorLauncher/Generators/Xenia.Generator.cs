@@ -703,20 +703,10 @@ namespace EmulatorLauncher
                     else if (Features.IsSupported("vsync"))
                         ini.AppendValue("GPU", "guest_display_refresh_cap", "true");
 
-                    if (SystemConfig.isOptSet("query_occlusion_sample_lower_threshold") && !string.IsNullOrEmpty(SystemConfig["query_occlusion_sample_lower_threshold"]))
-                        ini.AppendValue("GPU", "query_occlusion_sample_lower_threshold", SystemConfig["query_occlusion_sample_lower_threshold"]);
-                    else if (Features.IsSupported("query_occlusion_sample_lower_threshold"))
-                        ini.AppendValue("GPU", "query_occlusion_sample_lower_threshold", "80");
-
-                    if (SystemConfig.isOptSet("query_occlusion_sample_upper_threshold") && !string.IsNullOrEmpty(SystemConfig["query_occlusion_sample_upper_threshold"]))
-                    {
-                        ini.AppendValue("GPU", "query_occlusion_sample_upper_threshold", SystemConfig["query_occlusion_sample_upper_threshold"]);
-
-                        if (SystemConfig["query_occlusion_sample_upper_threshold"] == "0")
-                            ini.AppendValue("GPU", "query_occlusion_sample_lower_threshold", "0");
-                    }
-                    else if (Features.IsSupported("query_occlusion_sample_upper_threshold"))
-                        ini.AppendValue("GPU", "query_occlusion_sample_upper_threshold", "100");
+                    if (SystemConfig.isOptSet("occlusion_query") && !string.IsNullOrEmpty(SystemConfig["occlusion_query"]))
+                        ini.AppendValue("GPU", "occlusion_query", SystemConfig["occlusion_query"]);
+                    else if (Features.IsSupported("occlusion_query"))
+                        ini.AppendValue("GPU", "occlusion_query", "fake");
 
                     if (SystemConfig.isOptSet("xenia_clear_memory_page_state") && SystemConfig.getOptBoolean("xenia_clear_memory_page_state"))
                         ini.AppendValue("GPU", "clear_memory_page_state", "true");
