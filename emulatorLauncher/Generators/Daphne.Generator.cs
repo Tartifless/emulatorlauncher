@@ -53,6 +53,13 @@ namespace EmulatorLauncher
                     commandArray.Add(xString);
                 }
 
+                if (SystemConfig.isOptSet("MonitorIndex"))
+                {
+                    string screenString = SystemConfig["MonitorIndex"];
+                    commandArray.Add("-screen");
+                    commandArray.Add(screenString);
+                }
+
                 if (SystemConfig.isOptSet("hypseus_renderer") && SystemConfig["hypseus_renderer"] == "vulkan")
                 {
                     commandArray.Remove("-opengl");
