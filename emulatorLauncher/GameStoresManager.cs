@@ -15,12 +15,20 @@ namespace EmulatorLauncher
     {
         public static void UpdateGames()
         {
-            if (!Program.SystemConfig.getOptBoolean("scanStore") && !Program.SystemConfig.getOptBoolean("exodosScan")
-                && !Program.SystemConfig.isOptSet("agsPath") && !Program.SystemConfig.getOptBoolean("exowin3xScan")
-                && !Program.SystemConfig.getOptBoolean("exowin9xScan"))
+            if (!Program.SystemConfig.getOptBoolean("scanStore") 
+                && !Program.SystemConfig.getOptBoolean("exodosScan")
+                && !Program.SystemConfig.isOptSet("agsPath") 
+                && !Program.SystemConfig.getOptBoolean("exowin3xScan")
+                && !Program.SystemConfig.getOptBoolean("exowin9xScan") 
+                && !Program.SystemConfig.getOptBoolean("n64_recompscan"))
             {
                 SimpleLogger.Instance.Info("[ImportStore] Option to scan installed store games is disabled.");
                 return;
+            }
+
+            if (Program.SystemConfig.getOptBoolean("n64_recompscan"))
+            {
+                N64RecompGenerator.UpdateN64RecompGames();
             }
 
             if (Program.SystemConfig.getOptBoolean("exodosScan") && Program.SystemConfig.isOptSet("exodosPath") && !string.IsNullOrEmpty(Program.SystemConfig["exodosPath"]))

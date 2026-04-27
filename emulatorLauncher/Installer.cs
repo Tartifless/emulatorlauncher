@@ -89,6 +89,7 @@ namespace EmulatorLauncher
             { new Installer("mgba", "mgba", "mGBA.exe") },
             { new Installer("model3", "supermodel", "supermodel.exe") },
             { new Installer("mupen64", "mupen64", "RMG.exe") },
+            { new Installer("n64recomplauncher", "n64recomplauncher", "N64RecompLauncher.exe") },
             { new Installer("nosgba", "nosgba", "no$gba.exe") },
             { new Installer("openbor") },
             { new Installer("opengoal", "opengoal", "gk.exe") },

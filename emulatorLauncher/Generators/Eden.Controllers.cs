@@ -15,6 +15,7 @@ namespace EmulatorLauncher
         private Dictionary<string, int> _samePad = new Dictionary<string, int>();
         private static bool _norawinput = false;
         private int _joyconIndex = 0;
+        private bool _invertIndexes = false;
 
         /// <summary>
         /// Cf. TBD
@@ -92,6 +93,9 @@ namespace EmulatorLauncher
 
             // Hotkeys
             WriteShortcuts(ini);
+
+            if (SystemConfig.getOptBoolean("revertXIndex") && Controllers.Where(c => !c.IsKeyboard).Count() > 1)
+                _invertIndexes = true;
 
             foreach (var controller in this.Controllers.OrderBy(i => i.PlayerIndex))
                 ConfigureInput(controller, ini);
@@ -248,8 +252,13 @@ namespace EmulatorLauncher
 
             int index = 0;
             if (_samePad.ContainsKey(edenGuid))
-            {
                 index = _samePad[edenGuid];
+
+            // option to invert indexes, useful if exactly the same xinput pad is used
+            if (_invertIndexes && _samePad.ContainsKey(edenGuid))
+            {
+                if (index == 0) index = 1;
+                else if (index == 1) index = 0;
             }
 
             string player = "player_" + (controller.PlayerIndex - 1) + "_";
