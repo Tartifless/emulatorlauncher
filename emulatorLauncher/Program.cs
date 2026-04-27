@@ -119,6 +119,7 @@ namespace EmulatorLauncher
             { "model3", () => new Model3Generator() },
             { "mugen", () => new ExeLauncherGenerator() },
             { "mupen64", () => new Mupen64Generator() },
+            { "n64recomplauncher", () => new N64RecompGenerator() },
             { "nosgba", () => new NosGbaGenerator() },
             { "no$gba", () => new NosGbaGenerator() },
             { "n-gage", () => new Eka2l1Generator() },

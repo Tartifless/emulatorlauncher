@@ -146,6 +146,7 @@
     <Compile Include="EsSaveStatesExtensions.cs" />
     <Compile Include="GameStoresManager.cs" />
     <Compile Include="Generators\ExoDOS.Generator.cs" />
+    <Compile Include="Generators\N64Recomp.Generator.cs" />
     <Compile Include="Installer.cs" />
     <Compile Include="InstallerFrm.cs">
       <SubType>Form</SubType>
