@@ -89,7 +89,7 @@ namespace EmulatorLauncher
                     {
                         Uri uri = new Uri(game.LauncherUrl);
 
-                        string gameName = RemoveInvalidFileNameChars(game.Name);
+                        string gameName = FileTools.CleanupName(game.Name);
 
                         string path = Path.Combine(dir, gameName + ".url");
                         if (uri.Scheme == "file")
@@ -156,12 +156,6 @@ namespace EmulatorLauncher
             }
 
             catch (Exception ex) { SimpleLogger.Instance.Error("[ImportStore] " + name + " : " + ex.Message, ex); }
-        }
-
-        private static string RemoveInvalidFileNameChars(string x)
-        {
-            var invalidChars = Path.GetInvalidFileNameChars();
-            return new string(x.Where(c => !invalidChars.Contains(c)).ToArray());
         }
     }
 }

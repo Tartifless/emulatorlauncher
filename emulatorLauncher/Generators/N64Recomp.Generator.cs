@@ -18,6 +18,45 @@ namespace EmulatorLauncher
     {
         private static string _exename;
         private static string _exeFile;
+        private bool _batFile = false;
+
+        private Dictionary<string, string> recompExecutables = new Dictionary<string, string>()
+        {
+            { "Banjo 64", "BanjoRecompiled.exe" },
+            { "Bomberman 64", "BM64Recompiled.exe" },
+            { "Infinite Mario 64", "Infinite Mario 64.exe" },
+            { "Chameleon Twist", "ChameleonTwistJPRecompiled.exe" },
+            { "SM64 CoopDX", "sm64coopdx.exe" },
+            { "Dragon Ball Z Budokai", "dbz1.exe" },
+            { "Dinosaur Planet", "DinosaurPlanetRecompiled.exe" },
+            { "Duke Nukem: Zero Hour", "DNZHRecompiled.exe" },
+            { "Dr. Mario 64", "drmario64_recomp.exe" },
+            { "Sonic 1 Forever", "SonicForever.exe" },
+            { "Sonic 3 AIR", "Sonic3AIR.exe" },
+            { "Perfect Dark", "pd.x86_64.exe" },
+            { "Animal Crossing (Game Cube)", "AnimalCrossing.exe" },
+            { "Goemon 64", "Goemon64Recompiled.exe" },
+            { "Zelda MM (2 Ship 2 Harkinian)", "2ship.exe" },
+            { "Super Mario 64 (Ghostship)", "Ghostship.exe" },
+            { "Zelda OoT (Ship of Harkinian)", "soh.exe" },
+            { "Mario Kart 64 (SpaghettiKart)", "Spaghettify.exe" },
+            { "Star Fox 64 (Starship)", "Starship.exe" },
+            { "Super Mario Bros. Remastered", "SMB1R.exe" },
+            { "LoD: Severed Chains", "launch.bat" },
+            { "Mario Kart 64", "MarioKart64Recompiled.exe" },
+            { "Banjo-Kazooie: Nuts & Bolts", "renut-windows-x64.exe" },
+            { "Mega Man 64", "MegaMan64Recompiled.exe" },
+            { "REDRIVER 2", "REDRIVER2.exe" },
+            { "Quest 64", "Quest64Recompiled.exe" },
+            { "Super Metroid Launcher", "Super Metroid Launcher.exe" },
+            { "Zelda: ALttP (Zelda 3 Launcher)", "Zelda 3 Launcher.exe" },
+            { "Super Mario World", "smw.exe" },
+            { "Viva Pinata Trouble in Paradise", "retip-windows-x64.exe" },
+            { "Sonic Unleashed Recompiled", "UnleashedRecomp.exe" },
+            { "Star Fox 64", "Starfox64Recompiled.exe" },
+            { "WipeOut Phantom Edition", "wipeout.exe" },
+            { "Zelda 64", "Zelda64Recompiled.exe" }
+        };
 
         public override System.Diagnostics.ProcessStartInfo Generate(string system, string emulator, string core, string rom, string playersControllers, ScreenResolution resolution)
         {
@@ -49,13 +88,53 @@ namespace EmulatorLauncher
 
                 if (catalog != null)
                 {
-                    var allGames = catalog.Standard.Concat(catalog.Experimental).Concat(catalog.Custom);
+                    var allGames = (catalog.Standard ?? Enumerable.Empty<GameEntry>())
+                        .Concat(catalog.Experimental ?? Enumerable.Empty<GameEntry>())
+                        .Concat(catalog.Custom ?? Enumerable.Empty<GameEntry>());
+                    
                     if (allGames.Any(g => g.Name.Equals(targetGame, StringComparison.InvariantCultureIgnoreCase)))
                     {
                         var gametoConf = allGames.FirstOrDefault(g => g.Name.Equals(targetGame, StringComparison.InvariantCultureIgnoreCase));
                         
                         string gameFolder = Path.Combine(recompiledGames, gametoConf.FolderName);
-                        if (Directory.Exists(gameFolder))
+                        
+                        if (recompExecutables.ContainsKey(gametoConf.Name))
+                        {
+                            _exename = Path.GetFileNameWithoutExtension(recompExecutables[gametoConf.Name]);
+                            _exeFile = Path.Combine(gameFolder, recompExecutables[gametoConf.Name]);
+
+                            if (recompExecutables[gametoConf.Name].EndsWith(".bat", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                _batFile = true;
+                                _exename = "";
+                            }
+
+                            if (gametoConf.Name == "Perfect Dark" && SystemConfig.isOptSet("pdark_region"))
+                            {
+                                switch (SystemConfig["pdark_region"])
+                                {
+                                    case "EUR":
+                                        _exename = "pd.pal.x86_64";
+                                        _exeFile = Path.Combine(gameFolder, "pd.pal.x86_64.exe");
+                                        break;
+                                    case "JPN":
+                                        _exename = "pd.jpn.x86_64";
+                                        _exeFile = Path.Combine(gameFolder, "pd.jpn.x86_64.exe");
+                                        break;
+                                    default:
+                                        _exename = "pd.x86_64";
+                                        _exeFile = Path.Combine(gameFolder, "pd.x86_64.exe");
+                                        break;
+                                }
+                            }
+                            
+                            SimpleLogger.Instance.Info("[N64Recomp] Monitoring " + _exename);
+
+                            if (catalog.Standard != null && catalog.Standard.Any(g => g.Name.Equals(targetGame, StringComparison.InvariantCultureIgnoreCase)))
+                                SetupRecompGame(gameFolder);
+                        }
+                        
+                        else if (Directory.Exists(gameFolder))
                         {
                             var exeFiles = Directory.GetFiles(gameFolder, "*.exe", SearchOption.TopDirectoryOnly);
                             if (exeFiles.Length > 0)
@@ -76,11 +155,18 @@ namespace EmulatorLauncher
             {
                 if (_exename != "N64RecompLauncher")
                 {
-                    return new ProcessStartInfo()
+                    var psi = new ProcessStartInfo()
                     {
                         FileName = _exeFile,
                         WorkingDirectory = Path.GetDirectoryName(_exeFile),
                     };
+
+                    if (_batFile)
+                    {
+                        psi.UseShellExecute = true;
+                    }
+
+                    return psi;
                 }
 
                 else
@@ -186,8 +272,21 @@ namespace EmulatorLauncher
             Process process = Process.Start(path);
             Thread.Sleep(500);
 
-            var processToMonitor = Process.GetProcessesByName(_exename).FirstOrDefault();
-            processToMonitor?.WaitForExit();
+            if (_batFile)
+                process.WaitForExit();
+
+            else if (!string.IsNullOrEmpty(_exename))
+            {
+                Process processToMonitor = null;
+                int elapsed = 0;
+                while (processToMonitor == null && elapsed < 10000)
+                {
+                    Thread.Sleep(200);
+                    elapsed += 200;
+                    processToMonitor = Process.GetProcessesByName(_exename).FirstOrDefault();
+                }
+                processToMonitor?.WaitForExit();
+            }
 
             return 0;
         }
@@ -247,7 +346,10 @@ namespace EmulatorLauncher
                 string json = File.ReadAllText(gamesJSON);
                 GameCatalog catalog = JsonConvert.DeserializeObject<GameCatalog>(json);
 
-                var allGames = catalog.Standard.Concat(catalog.Experimental).Concat(catalog.Custom);
+                var allGames = (catalog.Standard ?? Enumerable.Empty<GameEntry>())
+                    .Concat(catalog.Experimental ?? Enumerable.Empty<GameEntry>())
+                    .Concat(catalog.Custom ?? Enumerable.Empty<GameEntry>());
+
                 string romPath = Path.Combine(Program.AppConfig.GetFullPath("retrobat"), "roms", "n64recomp");
                 if (!Directory.Exists(romPath))
                     try { Directory.CreateDirectory(romPath); } catch { return; }
@@ -271,7 +373,8 @@ namespace EmulatorLauncher
 
             dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));
             string target = Path.Combine(recompLauncherPath, "N64RecompLauncher.exe");
-            string shortcutPath = Path.Combine(romPath, game.Name.Replace(":", " -") + ".lnk");
+            string cleanName = FileTools.CleanupName(game.Name);
+            string shortcutPath = Path.Combine(romPath, cleanName + ".lnk");
             if (File.Exists(shortcutPath))
                 return;
 
