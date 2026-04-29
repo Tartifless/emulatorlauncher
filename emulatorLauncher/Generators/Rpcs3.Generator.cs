@@ -373,6 +373,14 @@ namespace EmulatorLauncher
                 BindBoolFeature(video, "Disable ZCull Occlusion Queries", "disable_zcull_queries", "true", "false");
                 BindFeatureSlider(video, "Minimum Scalable Dimension", "rpcs3_resolution_scale", "16");
 
+                if (SystemConfig.isOptSet("rpcs3_vblank_frequency") && !string.IsNullOrEmpty(SystemConfig["rpcs3_vblank_frequency"]))
+                {
+                    if (SystemConfig["rpcs3_vblank_frequency"] != "keep")
+                        video["Vblank Rate"] = SystemConfig[""];
+                }
+                else
+                    video["Vblank Rate"] = "60";
+
                 // ZCULL Accuracy
                 if (SystemConfig.isOptSet("zcull_accuracy") && (SystemConfig["zcull_accuracy"] == "Approximate"))
                 {

@@ -480,5 +480,12 @@ namespace EmulatorLauncher.Common
                 SimpleLogger.Instance.Warning("[FileTools] Unable to create directory " + path + " : " + ex.Message);
             }
         }
+
+        public static string CleanupName(string x)
+        {
+            x = x.Replace(":", " -");
+            var invalidChars = Path.GetInvalidFileNameChars();
+            return new string(x.Where(c => !invalidChars.Contains(c)).ToArray());
+        }
     }
 }
