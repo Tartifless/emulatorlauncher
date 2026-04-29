@@ -376,7 +376,7 @@ namespace EmulatorLauncher
                 if (SystemConfig.isOptSet("rpcs3_vblank_frequency") && !string.IsNullOrEmpty(SystemConfig["rpcs3_vblank_frequency"]))
                 {
                     if (SystemConfig["rpcs3_vblank_frequency"] != "keep")
-                        video["Vblank Rate"] = SystemConfig[""];
+                        video["Vblank Rate"] = SystemConfig["rpcs3_vblank_frequency"];
                 }
                 else
                     video["Vblank Rate"] = "60";
