@@ -25,6 +25,7 @@ namespace EmulatorLauncher
         private bool _triforce = false;
         private bool _namco2x6 = false;
         private bool _namco3xx = false;
+        private bool _chihiro = false;
 
         static readonly Dictionary<string, string> executables = new Dictionary<string, string>()
         {
@@ -183,6 +184,8 @@ namespace EmulatorLauncher
                 _namco2x6 = true;
             else if (core == "namco3xx")
                 _namco3xx = true;
+            else if (core == "chihiro")
+                _chihiro = true;
 
             if (!_namco2x6)
                 rom = this.TryUnZipGameIfNeeded(system, rom);
@@ -191,7 +194,7 @@ namespace EmulatorLauncher
             string gameName = Path.GetFileNameWithoutExtension(rom);
             SimpleLogger.Instance.Info("[INFO] Game name : " + gameName);
 
-            GameProfile profile = FindGameProfile(path, rom, gameName, _triforce, _namco2x6, _namco3xx);
+            GameProfile profile = FindGameProfile(path, rom, gameName, _triforce, _namco2x6, _namco3xx, _chihiro);
             if (profile == null)
             {
                 SimpleLogger.Instance.Error("[TeknoParrotGenerator] Unable to find gameprofile for " + rom);
@@ -230,7 +233,7 @@ namespace EmulatorLauncher
             bool multiExe = false;
 
             // Triforce case : put iso path in GamePath tag
-            if (_triforce || _namco2x6)
+            if (_triforce || _namco2x6 || _chihiro)
             {
                 userProfile.GamePath = rom;
             }
@@ -773,7 +776,7 @@ namespace EmulatorLauncher
             return path;
         }
 
-        private static GameProfile FindGameProfile(string path, string romPath, string gameName, bool triforce = false, bool namco2x6 = false, bool namco3xx = false)
+        private static GameProfile FindGameProfile(string path, string romPath, string gameName, bool triforce = false, bool namco2x6 = false, bool namco3xx = false, bool chihiro = false)
         {
             string currentFolderName = Path.GetFileNameWithoutExtension(romPath);
 
@@ -782,6 +785,44 @@ namespace EmulatorLauncher
                 var profile = JoystickHelper.DeSerializeGameProfile(Path.Combine(path, "GameProfiles", ymlProfileName + ".xml"), false);
                 if (profile != null)
                     return profile;
+            }
+
+            if (chihiro)
+            {
+                if (!Directory.Exists(romPath) && File.Exists(romPath))
+                    romPath = Path.GetDirectoryName(romPath);
+                string profileFile = Directory.GetFiles(romPath, "*.tprofile", SearchOption.TopDirectoryOnly).FirstOrDefault();
+
+                if (File.Exists(profileFile))
+                {
+                    string profileName = Path.GetFileNameWithoutExtension(profileFile);
+
+                    SimpleLogger.Instance.Info("[INFO] Profile file found: " + profileFile);
+
+                    if (File.Exists(Path.Combine(path, "GameProfiles", profileName + ".xml")))
+                    {
+                        var profile = JoystickHelper.DeSerializeGameProfile(Path.Combine(path, "GameProfiles", profileName + ".xml"), false);
+                        if (profile != null)
+                            return profile;
+                    }
+                }
+
+                if (!File.Exists(profileFile))
+                {
+                    string profileName = Path.GetFileNameWithoutExtension(romPath);
+                    SimpleLogger.Instance.Info("[INFO] Using folder name to find Game Profile.");
+
+                    string profilesDir = Path.Combine(path, "GameProfiles");
+                    string profileFile2 = Directory.EnumerateFiles(profilesDir, "*.xml", SearchOption.TopDirectoryOnly)
+                        .FirstOrDefault(f => string.Equals(Path.GetFileNameWithoutExtension(f), profileName, StringComparison.OrdinalIgnoreCase));
+
+                    if (profileFile2 != null)
+                    {
+                        var profile = JoystickHelper.DeSerializeGameProfile(profileFile2, false);
+                        if (profile != null)
+                            return profile;
+                    }
+                }
             }
 
             if (namco2x6)
@@ -830,9 +871,16 @@ namespace EmulatorLauncher
                     string profileName = Path.GetFileNameWithoutExtension(romPath);
                     SimpleLogger.Instance.Info("[INFO] Using folder name to find Game Profile.");
 
-                    var profile = JoystickHelper.DeSerializeGameProfile(Path.Combine(path, "GameProfiles", profileName + ".xml"), false);
-                    if (profile != null)
-                        return profile;
+                    string profilesDir = Path.Combine(path, "GameProfiles");
+                    string profileFile2 = Directory.EnumerateFiles(profilesDir, "*.xml", SearchOption.TopDirectoryOnly)
+                        .FirstOrDefault(f => string.Equals(Path.GetFileNameWithoutExtension(f), profileName, StringComparison.OrdinalIgnoreCase));
+
+                    if (profileFile2 != null)
+                    {
+                        var profile = JoystickHelper.DeSerializeGameProfile(profileFile2, false);
+                        if (profile != null)
+                            return profile;
+                    }
                 }
             }
 
@@ -1307,6 +1355,9 @@ namespace EmulatorLauncher
 
             if (_namco3xx)
                 KillProcessTree("rpcs3");
+
+            if (_chihiro)
+                KillProcessTree("cxbxr-ldr");
 
             return 0;
         }
