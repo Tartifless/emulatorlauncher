@@ -54,6 +54,8 @@ namespace EmulatorLauncher.Common
                 req.UserAgent = UserAgent;
                 req.KeepAlive = false;
                 req.Method = "HEAD";
+                req.Timeout = 5000;
+                req.ReadWriteTimeout = 5000;
                 req.CookieContainer = Cookies;
 
                 var resp = req.GetResponse() as HttpWebResponse;
