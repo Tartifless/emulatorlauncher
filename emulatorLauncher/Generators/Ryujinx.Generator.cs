@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace EmulatorLauncher
 {
@@ -96,8 +97,28 @@ namespace EmulatorLauncher
                 FileName = exe,
                 WorkingDirectory = path,
                 Arguments = args,
-                WindowStyle = ProcessWindowStyle.Minimized,
+                WindowStyle = ProcessWindowStyle.Minimized
             };
+        }
+
+        public override int RunAndWait(System.Diagnostics.ProcessStartInfo path)
+        {
+            Process.Start(path);
+            Thread.Sleep(2000);
+            Process ryujinx = null;
+            var timeout = DateTime.UtcNow.AddSeconds(30);
+
+            while (DateTime.UtcNow < timeout)
+            {
+                ryujinx = Process.GetProcessesByName("Ryujinx")
+                                 .FirstOrDefault(p => !p.HasExited);
+                if (ryujinx != null)
+                    break;
+                Thread.Sleep(500);
+            }
+
+            ryujinx?.WaitForExit();
+            return 0;
         }
 
         private string GetDefaultswitchLanguage()
