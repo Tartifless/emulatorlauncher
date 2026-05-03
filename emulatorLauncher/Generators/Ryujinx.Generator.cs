@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace EmulatorLauncher
 {
@@ -96,8 +97,28 @@ namespace EmulatorLauncher
                 FileName = exe,
                 WorkingDirectory = path,
                 Arguments = args,
-                WindowStyle = ProcessWindowStyle.Minimized,
+                WindowStyle = ProcessWindowStyle.Minimized
             };
+        }
+
+        public override int RunAndWait(System.Diagnostics.ProcessStartInfo path)
+        {
+            Process.Start(path);
+            Thread.Sleep(2000);
+            Process ryujinx = null;
+            var timeout = DateTime.UtcNow.AddSeconds(30);
+
+            while (DateTime.UtcNow < timeout)
+            {
+                ryujinx = Process.GetProcessesByName("Ryujinx")
+                                 .FirstOrDefault(p => !p.HasExited);
+                if (ryujinx != null)
+                    break;
+                Thread.Sleep(500);
+            }
+
+            ryujinx?.WaitForExit();
+            return 0;
         }
 
         private string GetDefaultswitchLanguage()
@@ -177,7 +198,8 @@ namespace EmulatorLauncher
             json.update_checker_type = "Off";
             json.show_confirm_exit = false;
             json.show_console = false;
-            json.focus_lost_action_type = SystemConfig.getOptBoolean("nopauseonlostfocus") ? "DoNothing" : "PauseEmulation";
+            bool pauseOnLostFocus = SystemConfig.isOptSet("nopauseonlostfocus") && !SystemConfig.getOptBoolean("nopauseonlostfocus");
+            json.focus_lost_action_type = pauseOnLostFocus ? "PauseEmulation" : "DoNothing";
 
             // Input
             if (SystemConfig.getOptBoolean("ryujinx_undock"))
