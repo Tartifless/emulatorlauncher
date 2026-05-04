@@ -109,8 +109,15 @@ namespace EmulatorLauncher
             if (system == "n64dd" && Path.GetExtension(rom) == ".ndd")
             {
                 string n64Rom = rom.Remove(rom.Length - 4);
+
+                if (!File.Exists(n64Rom))
+                    n64Rom = Path.Combine(AppConfig.GetFullPath("roms"), "n64", Path.GetFileNameWithoutExtension(rom));
+
                 if (File.Exists(n64Rom))
+                {
                     commandArray.Add("\"" + n64Rom + "\"");
+                    aresSystem = "Nintendo 64";
+                }
             }
 
             commandArray.Add("\"" + rom + "\"");
@@ -118,10 +125,13 @@ namespace EmulatorLauncher
             if (system == "n64dd" && Path.GetExtension(rom) != ".ndd")
             {
                 string nddRom = rom + ".ndd";
+                aresSystem = "Nintendo 64";
+
                 if (File.Exists(nddRom))
                     commandArray.Add("\"" + nddRom + "\"");
             }
 
+            commandArray[1] = "\"" + aresSystem + "\"";
             commandArray.Add("--no-file-prompt");
 
             if (fullscreen)
