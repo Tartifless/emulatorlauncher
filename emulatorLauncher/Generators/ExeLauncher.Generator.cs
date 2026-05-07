@@ -169,9 +169,12 @@ namespace EmulatorLauncher
         public override PadToKey SetupCustomPadToKeyMapping(PadToKey mapping)
         {
             if (_isGameExePath || _gameExeFile)
+            {
+                SimpleLogger.Instance.Info($"[PADTOKEY] Adding {_exename} to padtokey.");
                 return PadToKey.AddOrUpdateKeyMapping(mapping, _exename, InputKey.hotkey | InputKey.start, "(%{KILL})");
+            }
 
-            else if (_gameLauncher != null) 
+            else if (_gameLauncher != null)
                 return _gameLauncher.SetupCustomPadToKeyMapping(mapping);
 
             else if ((_systemName != "mugen" && _systemName != "ikemen") && string.IsNullOrEmpty(_exename))
