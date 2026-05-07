@@ -415,6 +415,7 @@ namespace EmulatorLauncher.Common.Joysticks
         public string Path { get; set; }
         public string RawPath { get; set; }
         public string Serial { get; set; }
+        public bool IsGamepad { get; set; }
 
         private const string SDL3_DLL = "SDL3.dll";
 
@@ -473,6 +474,9 @@ namespace EmulatorLauncher.Common.Joysticks
         [DllImport(SDL3_DLL, CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr SDL_GetGamepadSerial(IntPtr gamepad);
 
+        [DllImport(SDL3_DLL, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool SDL_IsGamepad(int instance_id);
+
         public string GuidString
         {
             get
@@ -521,6 +525,7 @@ namespace EmulatorLauncher.Common.Joysticks
 
                         ushort vendorID = SDL_GetJoystickVendorForID(instance_id);
                         ushort productID = SDL_GetJoystickProductForID(instance_id);
+                        bool isGamepad = SDL_IsGamepad(instance_id);
 
                         string serial = "Unknown";
                         IntPtr pad = SDL_OpenGamepad(instance_id);
@@ -544,7 +549,8 @@ namespace EmulatorLauncher.Common.Joysticks
                                 Path = path,
                                 InstanceID = instance_id,
                                 Serial = serial,
-                                Guid = guid
+                                Guid = guid,
+                                IsGamepad = isGamepad
                             });
                         }
                         catch
@@ -555,7 +561,8 @@ namespace EmulatorLauncher.Common.Joysticks
                                 Name = name,
                                 Path = path,
                                 InstanceID = instance_id,
-                                Serial = serial
+                                Serial = serial,
+                                IsGamepad = isGamepad
                             });
                         }
                     }
