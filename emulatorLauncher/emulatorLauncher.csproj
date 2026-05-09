@@ -145,8 +145,6 @@
     <Compile Include="EsFeaturesPoBuilder.cs" />
     <Compile Include="EsSaveStatesExtensions.cs" />
     <Compile Include="GameStoresManager.cs" />
-    <Compile Include="Generators\ExoDOS.Generator.cs" />
-    <Compile Include="Generators\N64Recomp.Generator.cs" />
     <Compile Include="Installer.cs" />
     <Compile Include="InstallerFrm.cs">
       <SubType>Form</SubType>
@@ -311,6 +309,7 @@
     <Compile Include="Generators\ExeLauncher.Guns.cs">
       <DependentUpon>ExeLauncher.Generator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Generators\ExoDOS.Generator.cs" />
     <Compile Include="Generators\EpicLauncher.Generator.cs">
       <DependentUpon>ExeLauncher.Generator.cs</DependentUpon>
     </Compile>
@@ -396,6 +395,10 @@
     <Compile Include="Generators\Lime3ds.Controllers.cs">
       <DependentUpon>Lime3ds.Generator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Generators\Linuxloader.Generator.cs" />
+    <Compile Include="Generators\Linuxloader.Controllers.cs">
+      <DependentUpon>Linuxloader.Generator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Generators\Love.Generator.cs" />
     <Compile Include="Generators\MagicEngine.Generator.cs" />
     <Compile Include="Generators\MagicEngine.Controllers.cs">
@@ -447,6 +450,7 @@
     <Compile Include="Generators\Mupen64.SaveStatesMonitor.cs">
       <DependentUpon>Mupen64.Generator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Generators\N64Recomp.Generator.cs" />
     <Compile Include="Generators\Nes3d.Generator.cs" />
     <Compile Include="Generators\NosGba.Generator.cs" />
     <Compile Include="Generators\OpenBor.Generator.cs" />

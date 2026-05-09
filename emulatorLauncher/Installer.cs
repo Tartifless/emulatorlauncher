@@ -78,6 +78,7 @@ namespace EmulatorLauncher
             { new Installer("kronos", "kronos", "kronos.exe") },
             { new Installer("libretro", "retroarch" ) },
             { new Installer("lime3ds", "lime3ds", "lime3ds.exe") },
+            { new Installer("linuxloader", "linuxloader", "linuxloader.exe") },
             { new Installer("love") },
             { new Installer("m2emulator", "m2emulator", "emulator_multicpu.exe") },
             { new Installer("magicengine", "magicengine", "pce.exe") },

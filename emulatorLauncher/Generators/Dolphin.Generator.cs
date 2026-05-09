@@ -644,10 +644,23 @@ namespace EmulatorLauncher
                         // Wii NAND path
                         if (system == "wii")
                         {
+                            ini.WriteValue("General", "WiiSDCardSyncFolder", Path.Combine(savesPath, "dolphin-emu", "User", "Load", "WiiSDSync") + "/");
+
                             string wiiNandPath = Path.Combine(savesPath, "dolphin-emu", "User", "Wii");
                             if (!Directory.Exists(wiiNandPath)) try { Directory.CreateDirectory(wiiNandPath); }
                                 catch { }
                             ini.WriteValue("General", "NANDRootPath", wiiNandPath);
+
+                            if (SystemConfig.isOptSet("wii_sdPath") && !string.IsNullOrEmpty(SystemConfig["wii_sdPath"]))
+                            {
+                                ini.WriteValue("General", "WiiSDCardPath", SystemConfig["wii_sdPath"]);
+                                ini.WriteValue("Core", "WiiSDCard", "True");
+                                ini.WriteValue("Core", "WiiSDCardAllowWrites", "True");
+                            }
+                            else
+                            {
+                                ini.WriteValue("General", "WiiSDCardPath", Path.Combine(savesPath, "dolphin-emu", "User", "Load", "WiiSD.raw"));
+                            }
                         }
 
                         // Gamecube saves

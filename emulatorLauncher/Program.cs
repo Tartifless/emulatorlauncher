@@ -106,6 +106,7 @@ namespace EmulatorLauncher
             { "kronos", () => new KronosGenerator() },
             { "libretro", () => new LibRetroGenerator() },
             { "lime3ds", () => new Lime3dsGenerator() },
+            { "linuxloader", () => new LinuxloaderGenerator() },
             { "love", () => new LoveGenerator() },
             { "m2emulator", () => new Model2Generator() },
             { "magicengine", () => new MagicEngineGenerator() },

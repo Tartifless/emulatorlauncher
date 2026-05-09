@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading;
 
 namespace EmulatorLauncher
 {
@@ -280,14 +282,49 @@ namespace EmulatorLauncher
 
         public override int RunAndWait(ProcessStartInfo path)
         {
-            int exitCode = base.RunAndWait(path);
+            Process.Start(path);
 
-            KillProcesses("eden-cli");
-            // Eden always returns 0xc0000005 ( null pointer !? )
-            if (exitCode == unchecked((int)0xc0000005))
-                return 0;
-            
-            return exitCode;
+            Process eden = null;
+            var timeout = DateTime.UtcNow.AddSeconds(10);
+
+            while (DateTime.UtcNow < timeout)
+            {
+                eden = Process.GetProcessesByName("eden")
+                              .FirstOrDefault(p => !p.HasExited);
+                if (eden != null)
+                    break;
+                Thread.Sleep(500);
+            }
+
+            if (eden != null)
+            {
+                var hwndTimeout = DateTime.UtcNow.AddSeconds(10);
+                IntPtr hwnd = IntPtr.Zero;
+                while (DateTime.UtcNow < hwndTimeout)
+                {
+                    hwnd = User32.FindHwnds(eden.Id).FirstOrDefault();
+                    if (hwnd != IntPtr.Zero)
+                        break;
+                    Thread.Sleep(200);
+                }
+
+                if (hwnd != IntPtr.Zero)
+                    User32.ForceForegroundWindow(hwnd);
+
+                eden.WaitForExit();
+
+                KillProcesses("eden-cli");
+
+                int exitCode = 0;
+                try { exitCode = eden.ExitCode; }
+                catch { exitCode = 0; }
+                
+                if (exitCode == unchecked((int)0xc0000005))
+                    return 0;
+                return exitCode;
+            }
+
+            return 0;
         }
 
         public override void Cleanup()
