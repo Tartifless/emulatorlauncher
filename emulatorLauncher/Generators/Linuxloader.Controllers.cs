@@ -144,6 +144,8 @@ namespace EmulatorLauncher
             if (ctrl == null)
                 return;
 
+            bool testService = SystemConfig.getOptBoolean("ll_testmode");
+
             string player = "P" + playerindex + "_";
             int cIndex = playerindex - 1;
 
@@ -211,13 +213,13 @@ namespace EmulatorLauncher
             // Common section
             if (playerindex == 1)
             {
-                ini.WriteValue("Common", "Test", "KEY_9");
+                ini.WriteValue("Common", "Test", testService ? "KEY_9, " + gcIndex + "BUTTON_RIGHTSTICK" : "KEY_9");
                 ini.WriteValue("Common", "ExitGame", "KEY_Escape");
                 ini.WriteValue("Common", "P1_Coin", "KEY_5, " + gcIndex + "BUTTON_BACK");
                 ini.WriteValue("Common", "P2_Coin", "KEY_6");
                 ini.WriteValue("Common", "P1_Start", "KEY_1, " + gcIndex + "BUTTON_START");
                 ini.WriteValue("Common", "P2_Start", "KEY_2");
-                ini.WriteValue("Common", "P1_Service", "KEY_0");
+                ini.WriteValue("Common", "P1_Service", testService ? "KEY_0, " + gcIndex + "BUTTON_LEFTSTICK" : "KEY_0");
             }
             if (playerindex == 2)
             {
