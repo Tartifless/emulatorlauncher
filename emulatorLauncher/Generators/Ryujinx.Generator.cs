@@ -1,4 +1,5 @@
 using EmulatorLauncher.Common;
+using EmulatorLauncher.Common.FileFormats;
 using EmulatorLauncher.Common.Joysticks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -21,6 +22,8 @@ namespace EmulatorLauncher
         private SdlVersion _sdlVersion = SdlVersion.SDL2_26;
         private string _emulatorPath;
         private bool _sdl3 = false;
+        private string _confPath;
+        private JArray _savedGameDirs = new JArray();
 
         public override System.Diagnostics.ProcessStartInfo Generate(string system, string emulator, string core, string rom, string playersControllers, ScreenResolution resolution)
         {
@@ -96,8 +99,7 @@ namespace EmulatorLauncher
             {
                 FileName = exe,
                 WorkingDirectory = path,
-                Arguments = args,
-                WindowStyle = ProcessWindowStyle.Minimized
+                Arguments = args
             };
         }
 
@@ -181,6 +183,18 @@ namespace EmulatorLauncher
 
             // Read and parse JSON
             string filePath = Path.Combine(setupPath, "Config.json");
+            _confPath = filePath;
+
+            if (!File.Exists(filePath))
+            {
+                string templateFile = Path.Combine(AppConfig.GetFullPath("retrobat"), "system", "templates", "ryujinx", "portable", "Config.json");
+                if (File.Exists(templateFile))
+                    try { File.Copy(templateFile, filePath); } catch { }
+            }
+
+            if (!File.Exists(filePath))
+                return;
+
             string jsonConfig = File.ReadAllText(filePath);
             dynamic json = JsonConvert.DeserializeObject(jsonConfig);
 
@@ -201,20 +215,14 @@ namespace EmulatorLauncher
             json.start_fullscreen = fullscreen ? true : false;
 
             // Folder
-            List<string> gameDirs = new List<string>(json.game_dirs.ToObject<string[]>());
-            string romPath = Path.Combine(AppConfig.GetFullPath("roms"), "switch");
-            if (Directory.Exists(romPath))
-            {
-                gameDirs.Add(romPath);
-                gameDirs = gameDirs.Distinct().ToList();
-                json.game_dirs = new Newtonsoft.Json.Linq.JArray(gameDirs);
-            }
+            _savedGameDirs = dynRoot["game_dirs"] as JArray ?? new JArray();
+            json.game_dirs = new JArray(); // clear temporarely (will be restored in cleanup)
 
             // General Settings
             json.check_updates_on_start = false;
             json.update_checker_type = "Off";
             json.show_confirm_exit = false;
-            json.show_console = false;
+            json.show_console = SystemConfig.getOptBoolean("ryujinx_showconsole") ? true : false;
             json.focus_lost_action_type = SystemConfig.getOptBoolean("nopauseonlostfocus") ? "DoNothing" : "PauseEmulation";
 
             // Input
@@ -313,6 +321,28 @@ namespace EmulatorLauncher
             string jsonNearExe = Path.Combine(path, "Config.json");
             if (File.Exists(jsonNearExe))
                 File.WriteAllText(jsonNearExe, updatedJson);
+
+            string jsonNearExePortable = Path.Combine(path, "portable", "Config.json");
+            if (File.Exists(jsonNearExePortable))
+                File.WriteAllText(jsonNearExePortable, updatedJson);
+        }
+
+        public override void Cleanup()
+        {
+            base.Cleanup();
+
+            // Restore game directories size in case it was changed by the user
+            if (!string.IsNullOrEmpty(_confPath) && File.Exists(_confPath))
+            {
+                string jsonConfig = File.ReadAllText(_confPath);
+                dynamic json = JsonConvert.DeserializeObject(jsonConfig);
+                JObject dynRoot = (JObject)json;
+                    json.game_dirs = _savedGameDirs;
+                
+                // save config file
+                string updatedJson = JsonConvert.SerializeObject(json, Formatting.Indented);
+                File.WriteAllText(_confPath, updatedJson);
+            }
         }
     }
 }
