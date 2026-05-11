@@ -223,7 +223,7 @@ namespace EmulatorLauncher
             json.update_checker_type = "Off";
             json.show_confirm_exit = false;
             json.show_console = SystemConfig.getOptBoolean("ryujinx_showconsole") ? true : false;
-            json.focus_lost_action_type = SystemConfig.getOptBoolean("nopauseonlostfocus") ? "DoNothing" : "PauseEmulation";
+            json.focus_lost_action_type = SystemConfig.isOptSet("nopauseonlostfocus") && !SystemConfig.getOptBoolean("nopauseonlostfocus") ? "PauseEmulation" : "DoNothing";
 
             // Input
             if (SystemConfig.getOptBoolean("ryujinx_undock"))
