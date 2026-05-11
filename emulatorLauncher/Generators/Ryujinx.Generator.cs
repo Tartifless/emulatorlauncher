@@ -19,7 +19,6 @@ namespace EmulatorLauncher
             DependsOnDesktopResolution = true;
         }
 
-        private SdlVersion _sdlVersion = SdlVersion.SDL2_26;
         private string _emulatorPath;
         private bool _sdl3 = false;
         private string _confPath;

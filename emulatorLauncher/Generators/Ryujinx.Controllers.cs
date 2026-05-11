@@ -20,9 +20,6 @@ namespace EmulatorLauncher
         /// </summary>
         private void UpdateSdlControllersWithHints()
         {
-            string dllPath = Path.Combine(_emulatorPath, "SDL2.dll");
-            _sdlVersion = SdlJoystickGuidManager.GetSdlVersion(dllPath);
-
             if (Program.Controllers.Count(c => !c.IsKeyboard) == 0)
                 return;
 
@@ -40,12 +37,8 @@ namespace EmulatorLauncher
                 hints.Add("SDL_HINT_JOYSTICK_HIDAPI_PS5_RUMBLE = 1");
             }
 
-            _sdlMapping = SdlDllControllersMapping.FromDll(dllPath, string.Join(",", hints));
-            if (_sdlMapping == null)
-            {
-                SdlGameController.ReloadWithHints(string.Join(",", hints));
-                Program.Controllers.ForEach(c => c.ResetSdlController());
-            }
+            SdlGameController.ReloadWithHints(string.Join(",", hints));
+            Program.Controllers.ForEach(c => c.ResetSdlController());
         }
 
         private SdlDllControllersMapping _sdlMapping;
@@ -416,17 +409,6 @@ namespace EmulatorLauncher
             }
 
             newInputConfig["right_joycon"] = JObject.FromObject(right_joycon);
-
-            // Player identification part
-            // Get guid in system.guid format
-            /*string guid = (_sdlVersion == SdlVersion.Unknown && c.SdlController.Guid != null) ? c.SdlController.Guid.ToString() : c.GetSdlGuid(_sdlVersion, true);
-
-            if (_sdlMapping != null)
-            {
-                var sdlTrueGuid = _sdlMapping.GetControllerGuid(c.DevicePath);
-                if (sdlTrueGuid != null)
-                    guid = sdlTrueGuid.ToString();
-            }*/
 
             string guid = c.Guid.ToString();
             if (SystemConfig.isOptSet("ryujinx_sdlguid") && SystemConfig.getOptBoolean("ryujinx_sdlguid"))
