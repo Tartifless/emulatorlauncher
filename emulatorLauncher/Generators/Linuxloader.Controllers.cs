@@ -214,7 +214,7 @@ namespace EmulatorLauncher
             if (playerindex == 1)
             {
                 ini.WriteValue("Common", "Test", testService ? "KEY_9, " + gcIndex + "BUTTON_RIGHTSTICK" : "KEY_9");
-                ini.WriteValue("Common", "ExitGame", "KEY_Escape");
+                ini.WriteValue("Common", "ExitGame", "KEY_Escape, " + gcIndex + "BUTTON_START + " + gcIndex + "BUTTON_BACK");
                 ini.WriteValue("Common", "P1_Coin", "KEY_5, " + gcIndex + "BUTTON_BACK");
                 ini.WriteValue("Common", "P2_Coin", "KEY_6");
                 ini.WriteValue("Common", "P1_Start", "KEY_1, " + gcIndex + "BUTTON_START");
