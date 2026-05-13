@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Controls;
 
 namespace EmulatorLauncher
 {
@@ -16,9 +15,14 @@ namespace EmulatorLauncher
 
         private void CreateControllerConfiguration(string cfgPath, string gamePath)
         {
+            bool guns = SystemConfig.getOptBoolean("use_guns");
+
             if (Program.SystemConfig.isOptSet("disableautocontrollers") && Program.SystemConfig["disableautocontrollers"] == "1")
             {
                 SimpleLogger.Instance.Info("[INFO] Auto controller configuration disabled.");
+
+                if (guns)
+                    ConfigureLindberghGunsAutoOff(cfgPath, "lindbergh");
                 return;
             }
 
@@ -46,6 +50,9 @@ namespace EmulatorLauncher
             {
                 foreach (var controller in this.Controllers.OrderBy(i => i.PlayerIndex).Take(2))
                     ConfigureInput(ini, controller, samePad);
+
+                if (guns)
+                    ConfigureLindberghGuns(ini, "lindbergh");
 
                 ini.Save();
             }
@@ -214,7 +221,7 @@ namespace EmulatorLauncher
             if (playerindex == 1)
             {
                 ini.WriteValue("Common", "Test", testService ? "KEY_9, " + gcIndex + "BUTTON_RIGHTSTICK" : "KEY_9");
-                ini.WriteValue("Common", "ExitGame", "KEY_Escape");
+                ini.WriteValue("Common", "ExitGame", "KEY_Escape, " + gcIndex + "BUTTON_START + " + gcIndex + "BUTTON_BACK");
                 ini.WriteValue("Common", "P1_Coin", "KEY_5, " + gcIndex + "BUTTON_BACK");
                 ini.WriteValue("Common", "P2_Coin", "KEY_6");
                 ini.WriteValue("Common", "P1_Start", "KEY_1, " + gcIndex + "BUTTON_START");
