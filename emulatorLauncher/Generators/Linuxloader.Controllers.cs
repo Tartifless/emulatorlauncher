@@ -15,13 +15,17 @@ namespace EmulatorLauncher
 
         private void CreateControllerConfiguration(string cfgPath, string gamePath)
         {
+            bool guns = SystemConfig.getOptBoolean("use_guns");
+
             if (Program.SystemConfig.isOptSet("disableautocontrollers") && Program.SystemConfig["disableautocontrollers"] == "1")
             {
                 SimpleLogger.Instance.Info("[INFO] Auto controller configuration disabled.");
+
+                if (guns)
+                    ConfigureLindberghGunsAutoOff(cfgPath, "lindbergh");
                 return;
             }
 
-            bool guns = SystemConfig.getOptBoolean("use_guns");
             string gameCtrlFile = Path.Combine(gamePath, "controls.ini");
             if (File.Exists(gameCtrlFile))
             {

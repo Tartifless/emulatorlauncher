@@ -13,6 +13,28 @@ namespace EmulatorLauncher
     {
         private bool _demulshooter = false;
 
+        /// <summary>
+        /// If controller autoconfig is off but use_guns is on.
+        /// </summary>
+        /// <param name="cfgPath"></param>
+        /// <param name="system"></param>
+        private void ConfigureLindberghGunsAutoOff(string cfgPath, string system)
+        {
+            using (var ini = new IniFile(cfgPath, IniOptions.UseSpaces))
+            {
+                // Common section
+                ini.WriteValue("Common", "ExitGame", "KEY_Escape");
+                ini.WriteValue("Common", "P1_Coin", "KEY_5");
+                ini.WriteValue("Common", "P2_Coin", "KEY_6");
+                ini.WriteValue("Common", "P1_Start", "KEY_1");
+                ini.WriteValue("Common", "P2_Start", "KEY_2");
+
+                // Gun section
+                ConfigureLindberghGuns(ini, "lindbergh");
+                ini.Save();
+            }
+        }
+
         private void ConfigureLindberghGuns(IniFile ini, string system)
         {
             bool guninvert = SystemConfig.getOptBoolean("gun_invert");
