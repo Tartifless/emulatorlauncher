@@ -81,6 +81,7 @@ namespace EmulatorLauncher
             { "dosbox-pure", () => new DosBoxPureGenerator() },
             { "dosbox-staging", () => new DosBoxStagingGenerator() },
             { "duckstation", () => new DuckstationGenerator() },
+            { "dusklight", () => new DuskLightGenerator() },
             { "easyrpg", () => new EasyRpgGenerator() },
             { "eden", () => new EdenGenerator() },
             { "eduke32", () => new EDukeGenerator() },

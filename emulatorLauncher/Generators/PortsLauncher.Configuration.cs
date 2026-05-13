@@ -31,6 +31,7 @@ namespace EmulatorLauncher
             Configurecgenius(commandArray, rom);
             Configurecorsixth(commandArray, rom);
             Configuredhewm3(commandArray, rom);
+            Configuredusklight(commandArray, rom);
             ConfigureGhostship(rom, exe);
             ConfigureOpenGoal(commandArray, rom);
             ConfigureOpenJazz(commandArray, rom);
@@ -520,6 +521,78 @@ namespace EmulatorLauncher
                 lines = lines.Where(line => !line.StartsWith("bind \"JOY")).ToArray();
                 File.WriteAllLines(cfgFile, lines);
             }
+        }
+
+        private void Configuredusklight(List<string> commandArray, string rom)
+        {
+            if (_emulator != "dusklight")
+                return;
+
+            // Commandarray and romPath
+            if (Path.GetExtension(rom).Equals(".m3u", StringComparison.OrdinalIgnoreCase))
+            {
+                string newRom = FileTools.ReadFirstValidLine(rom);
+                if (File.Exists(newRom))
+                {
+                    commandArray.Add("\"" + newRom + "\"");
+                    rom = newRom;
+                    _romPath = Path.GetDirectoryName(newRom);
+                }
+                else
+                {
+                    throw new ApplicationException("Unable to find path to iso in m3u file.");
+                }
+            }
+            else
+            {
+                commandArray.Add("\"" + rom + "\"");
+            }
+
+            // Ensure portable mode
+            string dataJson = Path.Combine(_path, "data_location.json");
+            if (!File.Exists(dataJson))
+            {
+                try
+                {
+                    File.WriteAllText(dataJson, "{\r\n    \"mode\": \"portable\"\r\n}");
+                }
+                catch { }
+            }
+
+            var datalocation = DynamicJson.Load(dataJson);
+            datalocation["mode"] = "portable";
+            datalocation.Save();
+
+            // Config json file
+            string dataPath = Path.Combine(_path, "data");
+            if (!Directory.Exists(dataPath))
+                try { Directory.CreateDirectory(dataPath); } catch { }
+
+            string configJson = Path.Combine(dataPath, "config.json");
+            if (!File.Exists(configJson))
+                try { File.WriteAllText(configJson, "{}"); } catch { }
+
+            var config = DynamicJson.Load(configJson);
+            config["backend.checkForUpdates"] = "false";
+            config["backend.isoPath"] = "\"" + rom + "\"";
+            config["backend.wasPresetChosen"] = "true";
+            config["video.enableFullscreen"] = _fullscreen ? "true" : "false";
+
+            BindFeature(config, "backend.graphicsBackend", "dusklight_renderer", "auto");
+            BindFeature(config, "game.internalResolutionScale", "dusklight_resolution", "0");
+            BindFeatureSlider(config, "game.shadowResolutionMultiplier", "dusklight_shadowres", "1");
+            BindFeature(config, "game.language", "dusklight_language", "0");
+            config["game.pauseOnFocusLost"] = SystemConfig.getOptBoolean("nopauseonlostfocus") ? "false" : "true";
+            BindBoolFeatureOn(config, "video.enableVsync", "dusklight_vsync", "true", "false");
+            BindBoolFeature(config, "video.lockAspectRatio", "dusklight_force43", "true", "false");
+            BindBoolFeature(config, "game.enableFpsOverlay", "dusklight_fps", "true", "false");
+            BindBoolFeature(config, "game.enableDiscordPresence", "discord", "true", "false");
+            BindFeature(config, "game.bloomMode", "dusklight_bloom", "2");
+
+            if (config["game.fpsOverlayCorner"] == null)
+                config["game.fpsOverlayCorner"] = "0";
+
+            config.Save();
         }
 
         private void ConfigureGhostship(string rom, string exe)

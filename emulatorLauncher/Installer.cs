@@ -56,6 +56,7 @@ namespace EmulatorLauncher
             { new Installer("dosbox-pure", "dosbox-pure", "DOSBoxPure.exe") },
             { new Installer("dosbox-staging", "dosbox-staging", "dosbox.exe") },
             { new Installer("duckstation", new string[] { "duckstation"}, new string[] { "duckstation-qt-x64-ReleaseLTCG.exe" }) },
+            { new Installer("dusklight", "dusklight", "dusklight.exe") },
             { new Installer("eden", "eden", "eden.exe") },
             { new Installer("eduke32", "eduke32", "eduke32.exe") },
             { new Installer("eka2l1", "eka2l1", "eka2l1_qt.exe") },
