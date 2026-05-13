@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Controls;
 
 namespace EmulatorLauncher
 {
@@ -22,6 +21,7 @@ namespace EmulatorLauncher
                 return;
             }
 
+            bool guns = SystemConfig.getOptBoolean("use_guns");
             string gameCtrlFile = Path.Combine(gamePath, "controls.ini");
             if (File.Exists(gameCtrlFile))
             {
@@ -46,6 +46,9 @@ namespace EmulatorLauncher
             {
                 foreach (var controller in this.Controllers.OrderBy(i => i.PlayerIndex).Take(2))
                     ConfigureInput(ini, controller, samePad);
+
+                if (guns)
+                    ConfigureLindberghGuns(ini, "lindbergh");
 
                 ini.Save();
             }

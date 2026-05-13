@@ -54,6 +54,9 @@ namespace EmulatorLauncher
             "ninjaslt", "ninjaslta", "ninjasltj", "ninjasltu", "pokasuka", "rangrmsn", "sprtshot", "xtrmhunt", "xtrmhnt2"
         };
 
+        private static readonly List<string> lindberghRoms = new List<string>
+        { "2spicy", "gsevo", "hotd4", "hotd4sp", "hotdex", "lgj", "lgjsp", "rambo" };
+
         private readonly List<string> model2Roms = new List<string>
         { "bel", "gunblade", "hotd", "rchase2", "vcop", "vcop2" };
 
@@ -232,7 +235,7 @@ namespace EmulatorLauncher
                     if (Program.SystemConfig.getOptBoolean("demul_noresize"))
                         commandArray.Add("-noresize");
                 }
-                else if (emulator == "windows" || emulator == "exelauncher")
+                else if (emulator == "windows" || emulator == "exelauncher" || emulator == "linuxloader")
                 {
                     if (Program.SystemConfig.getOptBoolean("ds_nocrosshair"))
                         commandArray.Add("-nocrosshair");
@@ -302,35 +305,18 @@ namespace EmulatorLauncher
 
             SimpleLogger.Instance.Info("[GUNS] Fetching Demulshooter -target argument.");
 
-            if (emulator == "m2emulator")
+            if (emulator == "chihiro" || emulator == "chihiro-ds")
             {
-                target = "model2";
+                target = "chihiro";
                 ret = true;
             }
+            
             else if (emulator == "demul")
             {
                 target = "demul07a";
                 ret = true;
             }
-            else if (emulator == "flycast")
-            {
-                target = "flycast";
-                ret = true;
-            }
-            else if (emulator == "chihiro" || emulator == "chihiro-ds")
-            {
-                target = "chihiro";
-                ret = true;
-            }
-            else if (emulator == "teknoparrot")
-            {
-                string romName = Path.GetFileNameWithoutExtension(rom);
-                if (teknoParrotGames.TryGetValue(romName, out var game))
-                {
-                    target = game.Target;
-                    ret = true;
-                }
-            }
+
             else if (emulator == "exelauncher")
             {
                 string romName = Path.GetFileNameWithoutExtension(rom);
@@ -341,6 +327,34 @@ namespace EmulatorLauncher
                 }
             }
 
+            else if (emulator == "flycast")
+            {
+                target = "flycast";
+                ret = true;
+            }
+
+            else if (emulator == "linuxloader")
+            {
+                target = "lindbergh";
+                ret = true;
+            }
+
+            else if (emulator == "m2emulator")
+            {
+                target = "model2";
+                ret = true;
+            }
+            
+            else if (emulator == "teknoparrot")
+            {
+                string romName = Path.GetFileNameWithoutExtension(rom);
+                if (teknoParrotGames.TryGetValue(romName, out var game))
+                {
+                    target = game.Target;
+                    ret = true;
+                }
+            }
+            
             return ret;
         }
 
@@ -351,48 +365,7 @@ namespace EmulatorLauncher
 
             SimpleLogger.Instance.Info("[GUNS] Fetching Demulshooter -rom argument.");
 
-            if (emulator == "m2emulator")
-            {
-                dsRom = Path.GetFileNameWithoutExtension(rom);
-                ret = true;
-            }
-            else if (emulator == "demul")
-            {
-                string romName = Path.GetFileNameWithoutExtension(rom).ToLower();
-                if (demulRoms.Contains(romName) || chihiroRoms.Contains(romName))
-                {
-                    dsRom = romName;
-                    ret = true;
-                }
-            }
-            else if (emulator == "flycast")
-            {
-                string romName = Path.GetFileNameWithoutExtension(rom).ToLower();
-                if (flycastRoms.Contains(romName))
-                {
-                    dsRom = romName;
-                    ret = true;
-                }
-            }
-            else if (emulator == "teknoparrot")
-            {
-                string romName = Path.GetFileNameWithoutExtension(rom);
-                if (teknoParrotGames.TryGetValue(romName, out var game))
-                {
-                    dsRom = game.RomName;
-                    ret = true;
-                }
-            }
-            else if (emulator == "exelauncher")
-            {
-                string romName = Path.GetFileNameWithoutExtension(rom);
-                if (exeLauncherGames.TryGetValue(romName, out var game))
-                {
-                    dsRom = game.RomName;
-                    ret = true;
-                }
-            }
-            else if (emulator == "chihiro")
+            if (emulator == "chihiro")
             {
                 if (chihiroRoms.Any(r => rom.IndexOf(r, StringComparison.OrdinalIgnoreCase) >= 0))
                 {
@@ -415,7 +388,7 @@ namespace EmulatorLauncher
                             ret = true;
                         }
                     }
-                    catch 
+                    catch
                     {
                         dsRom = "vcop3_old";
                         ret = true;
@@ -448,6 +421,63 @@ namespace EmulatorLauncher
                         ret = false;
                 }
             }
+
+            else if (emulator == "demul")
+            {
+                string romName = Path.GetFileNameWithoutExtension(rom).ToLower();
+                if (demulRoms.Contains(romName) || chihiroRoms.Contains(romName))
+                {
+                    dsRom = romName;
+                    ret = true;
+                }
+            }
+
+            else if (emulator == "exelauncher")
+            {
+                string romName = Path.GetFileNameWithoutExtension(rom);
+                if (exeLauncherGames.TryGetValue(romName, out var game))
+                {
+                    dsRom = game.RomName;
+                    ret = true;
+                }
+            }
+
+            else if (emulator == "flycast")
+            {
+                string romName = Path.GetFileNameWithoutExtension(rom).ToLower();
+                if (flycastRoms.Contains(romName))
+                {
+                    dsRom = romName;
+                    ret = true;
+                }
+            }
+
+            else if (emulator == "linuxloader")
+            {
+                string romName = Path.GetFileNameWithoutExtension(rom).ToLower();
+                if (lindberghRoms.Contains(romName))
+                {
+                    dsRom = romName;
+                    ret = true;
+                }
+            }
+
+            else if (emulator == "m2emulator")
+            {
+                dsRom = Path.GetFileNameWithoutExtension(rom);
+                ret = true;
+            }
+            
+            else if (emulator == "teknoparrot")
+            {
+                string romName = Path.GetFileNameWithoutExtension(rom);
+                if (teknoParrotGames.TryGetValue(romName, out var game))
+                {
+                    dsRom = game.RomName;
+                    ret = true;
+                }
+            }
+            
             return ret;
         }
 

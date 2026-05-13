@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
-using static EmulatorLauncher.Common.KeyboardInterceptor;
 
 namespace EmulatorLauncher
 {
@@ -20,6 +18,8 @@ namespace EmulatorLauncher
         }
 
         private string _path;
+        private bool _sindenSoft;
+        private string _romName;
 
         public override System.Diagnostics.ProcessStartInfo Generate(string system, string emulator, string core, string rom, string playersControllers, ScreenResolution resolution)
         {
@@ -31,6 +31,8 @@ namespace EmulatorLauncher
             string exe = Path.Combine(path, "linuxloader.exe");
             if (!File.Exists(exe))
                 return null;
+
+            _romName = Path.GetFileNameWithoutExtension(rom);
 
             // Check existence of config file, if not create it
             string controlsFile = Path.Combine(path, "controls.ini");
