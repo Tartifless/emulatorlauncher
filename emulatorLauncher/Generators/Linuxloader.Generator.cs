@@ -214,7 +214,7 @@ namespace EmulatorLauncher
                     // crosshairs
                     string cross1Path = Path.Combine(_path, "cross", "cross1.png");
                     if (SystemConfig.isOptSet("ll_crosshair1") && !string.IsNullOrEmpty(SystemConfig["ll_crosshair1"]))
-                        cross1Path = SystemConfig["ll_crosshair1"];
+                        cross1Path = SystemConfig["ll_crosshair1"];                        
 
                     if (!File.Exists(cross1Path))
                     {
@@ -223,7 +223,10 @@ namespace EmulatorLauncher
                             try { File.Copy(templateCross1, cross1Path); } catch { }
                     }
 
-                    ini.WriteValue("CrossHairs", "P1_CROSSHAIR_PATH", "\"" + cross1Path + "\"");
+                    if (SystemConfig.getOptBoolean("ll_crosshair"))
+                        ini.WriteValue("CrossHairs", "P1_CROSSHAIR_PATH", "\"" + cross1Path + "\"");
+                    else
+                        ini.WriteValue("CrossHairs", "P1_CROSSHAIR_PATH", "\"\"");
                 }
             }
             catch { SimpleLogger.Instance.Error("[ERROR] Unable to save config ini file."); }
@@ -249,6 +252,12 @@ namespace EmulatorLauncher
         public override void Cleanup()
         {
             base.Cleanup();
+
+            if (_demulshooter)
+                Demulshooter.KillDemulShooter();
+
+            if (_sindenSoft)
+                Guns.KillSindenSoftware();
         }
 
         public static Dictionary<string, string> ParseLauncherPaths(string ymlPath)
