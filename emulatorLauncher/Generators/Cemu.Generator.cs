@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Windows.Forms;
 using System.Xml.Linq;
+using static EmulatorLauncher.Common.KeyboardInterceptor;
 
 namespace EmulatorLauncher
 {
@@ -53,7 +56,7 @@ namespace EmulatorLauncher
                 if (string.IsNullOrEmpty(content))
                     throw new ApplicationException("Unable to find any path in the m3u.");
 
-                if (Path.IsPathRooted(content))
+                if (FileTools.IsPathFullyQualified(content))
                     rom = content;
                 else if (content.StartsWith(".\\") || content.StartsWith("./"))
                     rom = Path.Combine(romPath, content.Substring(2));
@@ -319,33 +322,60 @@ namespace EmulatorLauncher
                 gamePaths.Add(new XElement("Entry", romPath));
         }
 
+        public override int RunAndWait(ProcessStartInfo path)
+        {
+            try
+            {
+                var px = Process.Start(path);
+                if (px == null)
+                    return 0;
+
+                Job.Current.AddProcess(px);
+
+                using (var escHook = new KeyboardInterceptor(px, new KeyTrigger(Keys.Escape)))
+                {
+                    px.WaitForExit();
+                }
+            }
+            catch { }
+            return 0;
+        }
+
         public override void Cleanup()
         {
             base.Cleanup();
 
-            try
+            if (!_gameProfileRename)
+                return;
+
+            string oldPath = _gameProfilePath + ".old";
+
+            if (Directory.Exists(_gameProfilePath))
             {
-                if (_gameProfileRename)
+                try { Directory.Delete(_gameProfilePath, true); }
+                catch (Exception ex)
                 {
-                    string oldPath = _gameProfilePath + ".old";
-                    if (Directory.Exists(_gameProfilePath))
-                    {
-                        try { Directory.Delete(_gameProfilePath, true); }
-                        catch { }
-                    }
-                    
-                    if (Directory.Exists(oldPath) && !Directory.Exists(_gameProfilePath))
-                    {
-                        try 
-                        { 
-                            Directory.Move(oldPath, _gameProfilePath);
-                            SimpleLogger.Instance.Info("[GENERATOR] Resetting gameprofiles folder.");
-                        }
-                        catch { }
-                    }
+                    SimpleLogger.Instance.Warning("[GENERATOR] Failed to delete Cemu gameProfiles folder, backup will not be restored: " + ex.Message);
+                    return;
                 }
             }
-            catch { }
+                    
+            if (Directory.Exists(oldPath))
+            {
+                try 
+                { 
+                    Directory.Move(oldPath, _gameProfilePath);
+                    SimpleLogger.Instance.Info("[GENERATOR] Resetting gameprofiles folder.");
+                }
+                catch (Exception ex) 
+                {
+                    SimpleLogger.Instance.Error("[GENERATOR] Failed to restore Cemu gameProfiles backup: " + ex.Message);
+                }
+            }
+            else
+            {
+                SimpleLogger.Instance.Warning("[GENERATOR] gameProfiles backup folder not found, nothing to restore.");
+            }
         }
     }
 }

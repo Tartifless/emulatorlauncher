@@ -215,7 +215,7 @@ namespace EmulatorLauncher
                 if (zipHypseus)
                 {
                     commandArray.AddRange(new string[]
-                                           {
+                    {
                         "singe",
                         "vldp",
                         //"-retropath", // Requires the CreateSymbolicLink
@@ -225,12 +225,12 @@ namespace EmulatorLauncher
                         oneGun? "" : "-manymouse",
                         "-datadir", _daphneHomedir,
                         "-homedir", _daphneHomedir
-                                            });
+                    });
                 }
                 else if (useAlt)
                 {
                     commandArray.AddRange(new string[]
-                       {
+                    {
                         "singe",
                         "vldp",
                         //"-retropath", // Requires the CreateSymbolicLink
@@ -241,12 +241,12 @@ namespace EmulatorLauncher
                         oneGun? "" : "-manymouse",
                         "-datadir", _daphneHomedir,
                         "-homedir", _daphneHomedir
-                        });
+                    });
                 }
                 else
                 {
                     commandArray.AddRange(new string[]
-                       {
+                    {
                         "singe",
                         "vldp",
                         //"-retropath", // Requires the CreateSymbolicLink
@@ -256,7 +256,7 @@ namespace EmulatorLauncher
                         oneGun? "" : "-manymouse",
                         "-datadir", _daphneHomedir,
                         "-homedir", _daphneHomedir
-                        });
+                    });
                 }
 
                 if (RawLightgun.GetRawLightguns().Any(gun => gun.Type == RawLighGunType.SindenLightgun))
@@ -271,22 +271,22 @@ namespace EmulatorLauncher
                 if (emulator == "daphne")
                 {
                     commandArray.AddRange(new string[]
-                   {
-                       romName,
-                       "vldp",
+                    {
+                        romName,
+                        "vldp",
                         "-framefile", frameFile,
                         "-useoverlaysb", "2",
                         "-homedir", _daphneHomedir
-                   });
+                    });
                 }
                 else                 {
                     commandArray.AddRange(new string[]
-                   {
-                       romName,
-                       "vldp",
+                    {
+                        romName,
+                        "vldp",
                         "-framefile", frameFile,
                         "-homedir", _daphneHomedir
-                   });
+                    });
                 }
             }
             
@@ -336,7 +336,8 @@ namespace EmulatorLauncher
                         }
 
                         if (s == romName || s == "singe" || s == "vdlp" || s == "-fullscreen" ||
-                            s == "-opengl" || s == "-vulkan" || s == "-fastboot" || s == "-retropath" || s == "-manymouse" || s == "-ignore_aspect_ratio")
+                            s == "-opengl" || s == "-vulkan" || s == "-fastboot" || s == "-retropath" || s == "-manymouse" 
+                            || s == "-ignore_aspect_ratio")
                             continue;
 
                         if (s == "-x" || s == "-y" || s == "-framefile" || s == "-script" || s == "script" || s == "-useoverlaysb" || s == "-homedir" || s == "-datadir")
