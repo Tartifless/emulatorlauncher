@@ -255,9 +255,9 @@ namespace EmulatorLauncher
             WriteKeyboardMapping(padNumber, "Square", InputKey.y);
 
             if (_isArcade)
-                pcsx2ini.WriteValue(padNumber, "Start", azerty ? "Keyboard/Ampersand" : "Keyboard/1");
+                pcsx2ini.WriteValue(padNumber, "P1_Start", azerty ? "Keyboard/Ampersand" : "Keyboard/1");
             else
-                WriteKeyboardMapping(padNumber, "Start", InputKey.start);
+                WriteKeyboardMapping(padNumber, "P1_Start", InputKey.start);
 
             WriteKeyboardMapping(padNumber, "Select", InputKey.select);
             WriteKeyboardMapping(padNumber, "L1", InputKey.pageup);
@@ -283,8 +283,8 @@ namespace EmulatorLauncher
                 if (SystemConfig.isOptSet("pcsx2_servicemode") && !string.IsNullOrEmpty(SystemConfig["pcsx2_servicemode"]))
                 {
                     pcsx2ini.WriteValue("JVS", "TestMode", "true");
-                    pcsx2ini.WriteValue("JVS", "ToggleTestMode", "Keyboard/9");
-                    pcsx2ini.WriteValue("JVS", "P1_Service", "Keyboard/0");
+                    pcsx2ini.WriteValue("JVS", "ToggleTestMode", azerty ? "Keyboard/Ccedilla" : "Keyboard/9");
+                    pcsx2ini.WriteValue("JVS", "P1_Service", azerty ? "Keyboard/Agrave" : "Keyboard/0");
                 }
                 else
                 {
@@ -428,9 +428,6 @@ namespace EmulatorLauncher
                     pcsx2ini.WriteValue(padNumber, "R2", techPadNumber + GetDInputKeyName(dinputController, "righttrigger", -1, isXinput));
                 }
 
-                if (_isArcade)
-                    pcsx2ini.AppendValue(padNumber, "Start", azerty ? "Keyboard/Ampersand" : "Keyboard/1");
-
                 pcsx2ini.WriteValue(padNumber, "L3", techPadNumber + GetDInputKeyName(dinputController, "leftstick"));
                 pcsx2ini.WriteValue(padNumber, "R3", techPadNumber + GetDInputKeyName(dinputController, "rightstick"));
                 pcsx2ini.WriteValue(padNumber, "Analog", techPadNumber + GetDInputKeyName(dinputController, "misc1"));
@@ -537,14 +534,120 @@ namespace EmulatorLauncher
                         {
                             pcsx2ini.WriteValue("JVS", "TestMode", "true");
                             pcsx2ini.WriteValue("JVS", "ToggleTestMode", techPadNumber + GetDInputKeyName(dinputController, "rightstick"));
-                            pcsx2ini.AppendValue("JVS", "ToggleTestMode", "Keyboard/9");
+                            pcsx2ini.AppendValue("JVS", "ToggleTestMode", azerty ? "Keyboard/Ccedilla" : "Keyboard/9");
                             pcsx2ini.WriteValue("JVS", "P1_Service", techPadNumber + GetDInputKeyName(dinputController, "leftstick"));
-                            pcsx2ini.AppendValue("JVS", "P1_Service", "Keyboard/0");
+                            pcsx2ini.AppendValue("JVS", "P1_Service", azerty ? "Keyboard/Agrave" : "Keyboard/0");
                         }
                         else
                         {
                             pcsx2ini.WriteValue("JVS", "TestMode", "false");
                         }
+
+                        pcsx2ini.WriteValue("JVS", "P1_Up", techPadNumber + GetDInputKeyName(dinputController, "buttonup", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "P1_Right", techPadNumber + GetDInputKeyName(dinputController, "buttonright", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "P1_Down", techPadNumber + GetDInputKeyName(dinputController, "buttondown", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "P1_Left", techPadNumber + GetDInputKeyName(dinputController, "buttonleft", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Tekken_LeftPunch_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Tekken_RightPunch_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Tekken_LeftKick_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Tekken_RightKick_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Horizontal_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Vertical_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Guard_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Kick_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Gundam_Shoot_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Gundam_Melee_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Gundam_Jump_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Gundam_Target_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Punch_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Block_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Kick_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Beast_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Fate_Weak_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Fate_Medium_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Fate_Guard_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Fate_Strong_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Attack_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_ThrowGrab_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Guard_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Special_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "PrideGP_LeftPunch_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_RightPunch_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_LeftKick_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_RightKick_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Basara_Weak_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Basara_Medium_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Basara_Striker_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Basara_Strong_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Light_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Heavy_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Guard_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Jump_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "YuYu_Punch_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "YuYu_Kick_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "YuYu_Guard_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "SixButton_LightPunch_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_MediumPunch_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_LightKick_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_MediumKick_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_HeavyPunch_P1", techPadNumber + GetDInputKeyName(dinputController, "leftshoulder", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_HeavyKick_P1", techPadNumber + GetDInputKeyName(dinputController, "rightshoulder", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "P1_Start", techPadNumber + GetDInputKeyName(dinputController, "start", 0, isXinput));
+                        pcsx2ini.AppendValue("JVS", "P1_Start", azerty ? "Keyboard/Ampersand" : "Keyboard/1");
+
+                        pcsx2ini.WriteValue("JVS", "Gas", techPadNumber + GetDInputKeyName(dinputController, "righttrigger", 1, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Brake", techPadNumber + GetDInputKeyName(dinputController, "lefttrigger", 1, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SteerRight", techPadNumber + GetDInputKeyName(dinputController, "leftx", 1));
+                        pcsx2ini.WriteValue("JVS", "SteerLeft", techPadNumber + GetDInputKeyName(dinputController, "leftx", -1));
+                        pcsx2ini.WriteValue("JVS", "Racing_ShiftDown_P1", techPadNumber + GetDInputKeyName(dinputController, "leftshoulder", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Racing_ShiftUp_P1", techPadNumber + GetDInputKeyName(dinputController, "rightshoulder", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Racing_View_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        
+                        pcsx2ini.WriteValue("JVS", "BG3_ShiftDown_P1", techPadNumber + GetDInputKeyName(dinputController, "leftshoulder", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BG3_ShiftUp_P1", techPadNumber + GetDInputKeyName(dinputController, "rightshoulder", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BG3_Sidebrake_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BG3_View_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BG3_Hazard_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "P1_LLeverDown", techPadNumber + GetDInputKeyName(dinputController, "lefty", 1));
+                        pcsx2ini.WriteValue("JVS", "P1_LLeverUp", techPadNumber + GetDInputKeyName(dinputController, "lefty", -1));
+                        pcsx2ini.WriteValue("JVS", "P1_LLeverRight", techPadNumber + GetDInputKeyName(dinputController, "leftx", 1));
+                        pcsx2ini.WriteValue("JVS", "P1_LLeverLeft", techPadNumber + GetDInputKeyName(dinputController, "leftx", -1));
+                        pcsx2ini.WriteValue("JVS", "P1_RLeverDown", techPadNumber + GetDInputKeyName(dinputController, "righty", 1));
+                        pcsx2ini.WriteValue("JVS", "P1_RLeverUp", techPadNumber + GetDInputKeyName(dinputController, "righty", -1));
+                        pcsx2ini.WriteValue("JVS", "P1_RLeverRight", techPadNumber + GetDInputKeyName(dinputController, "rightx", 1));
+                        pcsx2ini.WriteValue("JVS", "P1_RLeverLeft", techPadNumber + GetDInputKeyName(dinputController, "rightx", -1));
+                        pcsx2ini.WriteValue("JVS", "P1_RTrigger", techPadNumber + GetDInputKeyName(dinputController, "righttrigger", 1, isXinput));
+                        pcsx2ini.WriteValue("JVS", "P1_LTrigger", techPadNumber + GetDInputKeyName(dinputController, "lefttrigger", 1, isXinput));
+                        pcsx2ini.WriteValue("JVS", "P1_LButton", techPadNumber + GetDInputKeyName(dinputController, "leftshoulder", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "P1_RButton", techPadNumber + GetDInputKeyName(dinputController, "rightshoulder", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Smash_Slice_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Smash_TopSpin_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Technic_Activate_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Technic_Action_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Technic_Super_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Baseball_B_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Baseball_C_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Baseball_A_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Shoot_P1", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Melee_P1", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Jump_P1", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Target_P1", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
                     }
 
                     var hotKeyName = GetDInputKeyName(dinputController, "back");
@@ -595,7 +698,79 @@ namespace EmulatorLauncher
                 {
                     if (_isArcade)
                     {
+                        pcsx2ini.WriteValue("JVS", "P2_Start", techPadNumber + GetDInputKeyName(dinputController, "start", 0, isXinput));
+                        pcsx2ini.AppendValue("JVS", "P2_Start", azerty ? "Keyboard/Eacute" : "Keyboard/2");
                         pcsx2ini.WriteValue("JVS", "Coin2", techPadNumber + GetDInputKeyName(dinputController, "back"));
+                        pcsx2ini.WriteValue("JVS", "P2_Up", techPadNumber + GetDInputKeyName(dinputController, "buttonup", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "P2_Right", techPadNumber + GetDInputKeyName(dinputController, "buttonright", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "P2_Down", techPadNumber + GetDInputKeyName(dinputController, "buttondown", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "P2_Left", techPadNumber + GetDInputKeyName(dinputController, "buttonleft", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Tekken_LeftPunch_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Tekken_RightPunch_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Tekken_LeftKick_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Tekken_RightKick_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Horizontal_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Vertical_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Guard_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Kick_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Punch_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Block_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Kick_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Beast_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Fate_Weak_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Fate_Medium_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Fate_Guard_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Fate_Strong_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Attack_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_ThrowGrab_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Guard_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Special_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "PrideGP_LeftPunch_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_RightPunch_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_LeftKick_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_RightKick_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Basara_Weak_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Basara_Medium_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Basara_Striker_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Basara_Strong_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Light_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Heavy_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Guard_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Jump_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "YuYu_Punch_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "YuYu_Kick_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "YuYu_Guard_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "SixButton_LightPunch_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_MediumPunch_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_LightKick_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_MediumKick_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_HeavyPunch_P2", techPadNumber + GetDInputKeyName(dinputController, "leftshoulder", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "SixButton_HeavyKick_P2", techPadNumber + GetDInputKeyName(dinputController, "rightshoulder", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Smash_Slice_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Smash_TopSpin_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Technic_Activate_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Technic_Action_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Technic_Super_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "Baseball_B_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Baseball_C_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "Baseball_A_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Shoot_P2", techPadNumber + GetDInputKeyName(dinputController, "x", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Melee_P2", techPadNumber + GetDInputKeyName(dinputController, "y", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Jump_P2", techPadNumber + GetDInputKeyName(dinputController, "a", 0, isXinput));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Target_P2", techPadNumber + GetDInputKeyName(dinputController, "b", 0, isXinput));
                     }
                 }
             }
@@ -646,9 +821,6 @@ namespace EmulatorLauncher
                     pcsx2ini.WriteValue(padNumber, "L2", techPadNumber + GetInputKeyName(ctrl, InputKey.l2, tech));
                     pcsx2ini.WriteValue(padNumber, "R2", techPadNumber + GetInputKeyName(ctrl, InputKey.r2, tech));
                 }
-
-                if (_isArcade)
-                    pcsx2ini.AppendValue(padNumber, "Start", azerty ? "Keyboard/Ampersand" : "Keyboard/1");
 
                 pcsx2ini.WriteValue(padNumber, "L3", techPadNumber + GetInputKeyName(ctrl, InputKey.l3, tech));
                 pcsx2ini.WriteValue(padNumber, "R3", techPadNumber + GetInputKeyName(ctrl, InputKey.r3, tech));
@@ -762,14 +934,120 @@ namespace EmulatorLauncher
                         {
                             pcsx2ini.WriteValue("JVS", "TestMode", "true");
                             pcsx2ini.WriteValue("JVS", "ToggleTestMode", techPadNumber + GetInputKeyName(ctrl, InputKey.r3, tech));
-                            pcsx2ini.AppendValue("JVS", "ToggleTestMode", "Keyboard/9");
+                            pcsx2ini.AppendValue("JVS", "ToggleTestMode", azerty ? "Keyboard/Ccedilla" : "Keyboard/9");
                             pcsx2ini.WriteValue("JVS", "P1_Service", techPadNumber + GetInputKeyName(ctrl, InputKey.l3, tech));
-                            pcsx2ini.AppendValue("JVS", "P1_Service", "Keyboard/0");
+                            pcsx2ini.AppendValue("JVS", "P1_Service", azerty ? "Keyboard/Agrave" : "Keyboard/0");
                         }
                         else
                         {
                             pcsx2ini.WriteValue("JVS", "TestMode", "false");
                         }
+
+                        pcsx2ini.WriteValue("JVS", "P1_Up", techPadNumber + GetInputKeyName(ctrl, InputKey.up, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_Right", techPadNumber + GetInputKeyName(ctrl, InputKey.right, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_Down", techPadNumber + GetInputKeyName(ctrl, InputKey.down, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_Left", techPadNumber + GetInputKeyName(ctrl, InputKey.left, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Tekken_LeftPunch_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Tekken_RightPunch_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Tekken_LeftKick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Tekken_RightKick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Horizontal_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Vertical_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Guard_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Kick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Gundam_Shoot_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Gundam_Melee_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Gundam_Jump_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Gundam_Target_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Punch_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Block_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Kick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Beast_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Fate_Weak_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Fate_Medium_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Fate_Guard_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Fate_Strong_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Attack_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_ThrowGrab_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Guard_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Special_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "PrideGP_LeftPunch_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_RightPunch_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_LeftKick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_RightKick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Basara_Weak_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Basara_Medium_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Basara_Striker_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Basara_Strong_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Light_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Heavy_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Guard_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Jump_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "YuYu_Punch_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "YuYu_Kick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "YuYu_Guard_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+
+                        pcsx2ini.WriteValue("JVS", "SixButton_LightPunch_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_MediumPunch_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_LightKick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_MediumKick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_HeavyPunch_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.pageup, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_HeavyKick_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.pagedown, tech));
+
+                        pcsx2ini.WriteValue("JVS", "P1_Start", techPadNumber + GetInputKeyName(ctrl, InputKey.start, tech));
+                        pcsx2ini.AppendValue("JVS", "P1_Start", azerty ? "Keyboard/Ampersand" : "Keyboard/1");
+
+                        pcsx2ini.WriteValue("JVS", "Gas", techPadNumber + GetInputKeyName(ctrl, InputKey.r2, tech));
+                        pcsx2ini.WriteValue("JVS", "Brake", techPadNumber + GetInputKeyName(ctrl, InputKey.l2, tech));
+                        pcsx2ini.WriteValue("JVS", "SteerRight", techPadNumber + GetInputKeyName(ctrl, InputKey.leftanalogright, tech));
+                        pcsx2ini.WriteValue("JVS", "SteerLeft", techPadNumber + GetInputKeyName(ctrl, InputKey.leftanalogleft, tech));
+                        pcsx2ini.WriteValue("JVS", "Racing_ShiftDown_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.pageup, tech));
+                        pcsx2ini.WriteValue("JVS", "Racing_ShiftUp_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.pagedown, tech));
+                        pcsx2ini.WriteValue("JVS", "Racing_View_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+
+                        pcsx2ini.WriteValue("JVS", "BG3_ShiftDown_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.pageup, tech));
+                        pcsx2ini.WriteValue("JVS", "BG3_ShiftUp_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.pagedown, tech));
+                        pcsx2ini.WriteValue("JVS", "BG3_Sidebrake_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "BG3_View_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "BG3_Hazard_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "P1_LLeverDown", techPadNumber + GetInputKeyName(ctrl, InputKey.leftanalogup, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_LLeverUp", techPadNumber + GetInputKeyName(ctrl, InputKey.leftanalogdown, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_LLeverRight", techPadNumber + GetInputKeyName(ctrl, InputKey.leftanalogright, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_LLeverLeft", techPadNumber + GetInputKeyName(ctrl, InputKey.leftanalogleft, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_RLeverDown", techPadNumber + GetInputKeyName(ctrl, InputKey.rightanalogdown, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_RLeverUp", techPadNumber + GetInputKeyName(ctrl, InputKey.rightanalogup, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_RLeverRight", techPadNumber + GetInputKeyName(ctrl, InputKey.rightanalogright, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_RLeverLeft", techPadNumber + GetInputKeyName(ctrl, InputKey.rightanalogleft, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_RTrigger", techPadNumber + GetInputKeyName(ctrl, InputKey.r2, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_LTrigger", techPadNumber + GetInputKeyName(ctrl, InputKey.l2, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_LButton", techPadNumber + GetInputKeyName(ctrl, InputKey.pageup, tech));
+                        pcsx2ini.WriteValue("JVS", "P1_RButton", techPadNumber + GetInputKeyName(ctrl, InputKey.pagedown, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Smash_Slice_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Smash_TopSpin_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Technic_Activate_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Technic_Action_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Technic_Super_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Baseball_B_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Baseball_C_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Baseball_A_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Shoot_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Melee_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Jump_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Target_P1", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
                     }
 
                     var hotKeyName = GetInputKeyName(ctrl, InputKey.hotkey, tech);
@@ -823,7 +1101,79 @@ namespace EmulatorLauncher
                 {
                     if (_isArcade)
                     {
+                        pcsx2ini.WriteValue("JVS", "P2_Start", techPadNumber + GetInputKeyName(ctrl, InputKey.start, tech));
+                        pcsx2ini.AppendValue("JVS", "P2_Start", azerty ? "Keyboard/Eacute" : "Keyboard/2");
                         pcsx2ini.WriteValue("JVS", "Coin2", techPadNumber + GetInputKeyName(ctrl, InputKey.select, tech));
+                        pcsx2ini.WriteValue("JVS", "P2_Up", techPadNumber + GetInputKeyName(ctrl, InputKey.up, tech));
+                        pcsx2ini.WriteValue("JVS", "P2_Right", techPadNumber + GetInputKeyName(ctrl, InputKey.right, tech));
+                        pcsx2ini.WriteValue("JVS", "P2_Down", techPadNumber + GetInputKeyName(ctrl, InputKey.down, tech));
+                        pcsx2ini.WriteValue("JVS", "P2_Left", techPadNumber + GetInputKeyName(ctrl, InputKey.left, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Tekken_LeftPunch_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Tekken_RightPunch_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Tekken_LeftKick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Tekken_RightKick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Horizontal_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Vertical_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Guard_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "SoulCal_Kick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Punch_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Block_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Kick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "BloodyRoar_Beast_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Fate_Weak_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Fate_Medium_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Fate_Guard_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Fate_Strong_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Attack_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_ThrowGrab_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Guard_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Kinnikuman_Special_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "PrideGP_LeftPunch_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_RightPunch_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_LeftKick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "PrideGP_RightKick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Basara_Weak_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Basara_Medium_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Basara_Striker_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Basara_Strong_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Light_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Heavy_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Guard_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "DragonBallZ_Jump_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "YuYu_Punch_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "YuYu_Kick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "YuYu_Guard_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+
+                        pcsx2ini.WriteValue("JVS", "SixButton_LightPunch_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_MediumPunch_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_LightKick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_MediumKick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_HeavyPunch_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.pageup, tech));
+                        pcsx2ini.WriteValue("JVS", "SixButton_HeavyKick_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.pagedown, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Smash_Slice_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Smash_TopSpin_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Technic_Activate_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Technic_Action_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "Technic_Super_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
+
+                        pcsx2ini.WriteValue("JVS", "Baseball_B_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "Baseball_C_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "Baseball_A_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Shoot_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.x, tech));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Melee_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.y, tech));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Jump_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.a, tech));
+                        pcsx2ini.WriteValue("JVS", "GundamQuiz_Target_P2", techPadNumber + GetInputKeyName(ctrl, InputKey.b, tech));
                     }
                 }
             }

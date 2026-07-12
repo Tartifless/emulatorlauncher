@@ -3272,7 +3272,7 @@ namespace EmulatorLauncher.Libretro
                 coreSettings["beetle_psx_hw_track_textures"] = "disabled";
             }
 
-            BindFeature(coreSettings, "beetle_psx_hw_internal_resolution", "internal_resolution", "1x(native)");
+            BindFeature(coreSettings, "beetle_psx_hw_internal_resolution", "beetle_psx_hw_internal_resolution", "1x(native)");
             BindFeature(coreSettings, "beetle_psx_hw_filter", "texture_filtering", "nearest");
             BindFeature(coreSettings, "beetle_psx_hw_dither_mode", "dither_mode", "disabled");
             BindFeature(coreSettings, "beetle_psx_hw_msaa", "msaa", "1x");

@@ -103,7 +103,7 @@ namespace EmulatorLauncher.Common.Launchers
                         return;
 
                     // Skip DLCs
-                    if (manifest.AppName != manifest.MainGameAppName)
+                    if (!string.IsNullOrEmpty(manifest.MainGameAppName) && (manifest.AppName != manifest.MainGameAppName))
                         return;
 
                     // Skip Plugins
