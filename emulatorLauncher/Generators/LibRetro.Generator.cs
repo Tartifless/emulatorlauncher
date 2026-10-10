@@ -1636,12 +1636,12 @@ namespace EmulatorLauncher.Libretro
             }
 
             // ---- Rewind buffer for cores with a very large state ----
-            // RetroArch records nothing when one state does not fit in rewind_buffer_size ("State capacity insufficient", state_manager.c)
-            const long largeRewindBuffer = 268435456;               // 256 MB, one zc255 state is ~34 MB
+            const long largeRewindBuffer = 268435456;               // 256 MB, largest state is flycast Naomi 2 (~90 MB)
             const string largeRewindBufferValue = "268435456";
-            const int largeRewindGranularity = 4;                   // capturing every frame is too slow for such a state
+            const int largeRewindGranularity = 4;                   // value forced for zc255, also used to undo it
 
-            if (coreLargeRewindState.Contains(core))
+            int minGranularity;
+            if (coreLargeRewindState.TryGetValue(core, out minGranularity))
             {
                 if (retroarchConfig["rewind_enable"] == "true")
                 {
@@ -1656,10 +1656,19 @@ namespace EmulatorLauncher.Libretro
                     {
                         SimpleLogger.Instance.Info("[INFO] Rewind buffer too small for '" + core + "', raising it to 256 MB");
                         retroarchConfig["rewind_buffer_size"] = largeRewindBufferValue;
+                    }
 
+                    if (minGranularity > 1)
+                    {
+                        // Capturing every frame is too slow for this core
                         int currentGranularity;
-                        if (!int.TryParse(retroarchConfig["rewind_granularity"], out currentGranularity) || currentGranularity < largeRewindGranularity)
-                            retroarchConfig["rewind_granularity"] = largeRewindGranularity.ToString();
+                        if (!int.TryParse(retroarchConfig["rewind_granularity"], out currentGranularity) || currentGranularity < minGranularity)
+                            retroarchConfig["rewind_granularity"] = minGranularity.ToString();
+                    }
+                    else if (retroarchConfig["rewind_buffer_size"] == largeRewindBufferValue && retroarchConfig["rewind_granularity"] == largeRewindGranularity.ToString())
+                    {
+                        // Undo the granularity left by a previous zc255 session
+                        retroarchConfig["rewind_granularity"] = "1";
                     }
                 }
             }
@@ -2555,7 +2564,15 @@ namespace EmulatorLauncher.Libretro
         static readonly List<string> coreNoAutoRewind = new List<string>() { "flycast", "zc255" };
 
         // Cores whose state leaves little or no room in RetroArch's default 20 MB rewind buffer
-        static readonly List<string> coreLargeRewindState = new List<string>() { "mupen64plus_next", "mupen64plus_next_gles3", "parallel_n64", "zc255" };
+        // Value: minimum rewind_granularity forced when rewind is on (1 = keep the user's value)
+        static readonly Dictionary<string, int> coreLargeRewindState = new Dictionary<string, int>()
+        {
+            { "flycast", 4 },                   // Dreamcast state is 26 MB+ (RAM 16 + VRAM 8 + ARAM 2), Naomi/Naomi 2 larger
+            { "mupen64plus_next", 1 },          // ~16.8 MB state, only ~3 MB of history left in 20 MB
+            { "mupen64plus_next_gles3", 1 },
+            { "parallel_n64", 1 },
+            { "zc255", 4 }                      // ~34 MB state, capturing every frame is too slow
+        };
 
         // Level < DETERMINISTIC - no run-ahead, no preemptive frames, no netplay (core_info.c:3098-3107)
         static List<string> coreNoRunahead = new List<string>() { "81", "applewin", "arduous", "azahar", "b2", "bennugd", "blastem", "bluemsx", "boom3", "boom3_xp", "bsnes", "bsnes-jg", 
