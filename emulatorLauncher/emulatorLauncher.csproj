@@ -206,6 +206,19 @@
     </Compile>
     <Compile Include="Generators\AmigaForever.Generator.cs" />
     <Compile Include="Generators\AppleWin.Generator.cs" />
+    <Compile Include="Generators\ArcadeDuck.Generator.cs" />
+    <Compile Include="Generators\ArcadeDuck.Controllers.cs">
+      <DependentUpon>ArcadeDuck.Generator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Generators\ArcadeDuck.Database.cs">
+      <DependentUpon>ArcadeDuck.Generator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Generators\ArcadeDuck.Guns.cs">
+      <DependentUpon>ArcadeDuck.Generator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Generators\ArcadeDuck.SaveStatesMonitor.cs">
+      <DependentUpon>ArcadeDuck.Generator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Generators\ArcadeFlashWeb.Generator.cs" />
     <Compile Include="Generators\Ares.Generator.cs" />
     <Compile Include="Generators\Ares.Controllers.cs">

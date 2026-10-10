@@ -44,6 +44,7 @@ namespace EmulatorLauncher
 
         private static readonly Dictionary<string, string> emulatorAppName = new Dictionary<string, string>()
         {
+            { "arcadeduck", "ArcadeDuck" },
             { "ares", "ares" },
             { "bigpemu", "BigPEmu" },
             { "bizhawk", "EmuHawk" },
@@ -97,6 +98,23 @@ namespace EmulatorLauncher
         #region emulators Hotkey Info
         private static readonly EmulatorHotkey[] EmulatorHotkeys = new EmulatorHotkey[]
         {
+            new EmulatorHotkey("arcadeduck", new EmulatorHotkeyInfo[]
+                {
+                    new EmulatorHotkeyInfo("input_menu_toggle", "OpenPauseMenu", "F1"),
+                    new EmulatorHotkeyInfo("input_toggle_fullscreen", "ToggleFullscreen", "F"),
+                    new EmulatorHotkeyInfo("input_hold_fast_forward", "FastForward", "L"),
+                    new EmulatorHotkeyInfo("input_rewind", "Rewind", "Backspace"),
+                    new EmulatorHotkeyInfo("input_toggle_fast_forward", "ToggleFastForward", "Space"),
+                    new EmulatorHotkeyInfo("input_frame_advance", "FrameStep", "K"),
+                    new EmulatorHotkeyInfo("input_screenshot", "Screenshot", "F8"),
+                    new EmulatorHotkeyInfo("input_save_state", "SaveSelectedSaveState", "F2"),
+                    new EmulatorHotkeyInfo("input_load_state", "LoadSelectedSaveState", "F4"),
+                    new EmulatorHotkeyInfo("input_state_slot_decrease", "SelectPreviousSaveStateSlot", "F6"),
+                    new EmulatorHotkeyInfo("input_state_slot_increase", "SelectNextSaveStateSlot", "F7"),
+                    new EmulatorHotkeyInfo("input_pause_toggle", "TogglePause", "P"),
+                    new EmulatorHotkeyInfo("input_exit_emulator", "PowerOff", "Escape")
+                }),
+
             new EmulatorHotkey("ares", new EmulatorHotkeyInfo[]
                 {
                     new EmulatorHotkeyInfo("input_toggle_fullscreen", "ToggleFullscreen", "0x1/0/40;;"),        // f

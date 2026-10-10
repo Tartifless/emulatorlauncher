@@ -52,6 +52,7 @@ namespace EmulatorLauncher
             { "apple2", () => new AppleWinGenerator() },
             { "apple2gs", () => new GsPlusGenerator() },
             { "applewin", () => new AppleWinGenerator() },
+            { "arcadeduck", () => new ArcadeDuckGenerator() },
             { "arcadeflashweb", () => new ArcadeFlashWebGenerator() },
             { "ares", () => new AresGenerator() },
             { "azahar", () => new AzaharGenerator() },
