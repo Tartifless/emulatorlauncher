@@ -28,6 +28,7 @@ namespace EmulatorLauncher
             { new Installer("apple2", "applewin") },
             { new Installer("apple2gs", "gsplus") },
             { new Installer("applewin") },
+            { new Installer("arcadeduck", "arcadeduck", "ArcadeDuck.exe") },
             { new Installer("arcadeflashweb") },
             { new Installer("ares", "ares", "ares.exe") },
             { new Installer("azahar", "azahar", "azahar.exe") },
