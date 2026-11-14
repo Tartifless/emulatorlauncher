@@ -69,14 +69,21 @@ namespace EmulatorLauncher
             if (parentRoms.TryGetValue(Path.GetFileNameWithoutExtension(rom).ToLowerInvariant(), out string parentRom))
             {
                 parentRom = Path.Combine(Path.GetDirectoryName(rom), parentRom + ".zip");
-                _destParent = Path.Combine(pakDir, Path.GetFileName(parentRom));
 
-                if (!File.Exists(_destParent))
+                // Missing parent: the emulator reports the missing files itself
+                if (!File.Exists(parentRom))
+                    SimpleLogger.Instance.Warning("[Model2] Parent rom not found: " + parentRom);
+                else
                 {
-                    File.Copy(parentRom, _destParent);
+                    _destParent = Path.Combine(pakDir, Path.GetFileName(parentRom));
 
-                    try { new FileInfo(_destParent).Attributes &= ~FileAttributes.ReadOnly; }
-                    catch { }
+                    if (!File.Exists(_destParent))
+                    {
+                        File.Copy(parentRom, _destParent);
+
+                        try { new FileInfo(_destParent).Attributes &= ~FileAttributes.ReadOnly; }
+                        catch { }
+                    }
                 }
             }
 
@@ -175,6 +182,12 @@ namespace EmulatorLauncher
         {
             if (Program.SystemConfig.isOptSet("disableautocontrollers") && Program.SystemConfig["disableautocontrollers"] == "1")
             {
+                // Guns are still configured (ini, DemulShooter, crosshairs), the .input file is kept
+                string game = Path.GetFileNameWithoutExtension(rom).ToLowerInvariant();
+                string parent = parentRoms.ContainsKey(game) ? parentRoms[game] : game;
+                if (SystemConfig.getOptBoolean("use_guns") && shooters.Contains(parent))
+                    ConfigureModel2Guns(ini, null, parent, true);
+
                 SimpleLogger.Instance.Info("Controller autoconfiguration disabled.");
                 return;
             }

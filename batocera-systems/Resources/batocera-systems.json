@@ -1516,6 +1516,33 @@
     ]
   },
 
+  "model1": {
+    "name": "Sega Model 1",
+    "biosFiles": [
+      {
+        "md5": "",
+        "file": "roms/model1/model1io.zip",
+        "optional": true
+      },
+      {
+        "md5": "",
+        "file": "roms/model1/model1io2.zip",
+        "optional": true
+      }
+    ]
+  },
+
+  "model2": {
+    "name": "Sega Model 2",
+    "biosFiles": [
+      {
+        "md5": "",
+        "file": "bios/sm2-emu/games.xml",
+        "optional": true
+      }
+    ]
+  },
+
   "msx": {
     "name": "MSX",
     "biosFiles": [

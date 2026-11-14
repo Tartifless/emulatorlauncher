@@ -15,15 +15,6 @@ namespace EmulatorLauncher
     {
         private void ConfigureControllers(byte[] bytes, IniFile ini, string parentRom)
         {
-            if (Program.SystemConfig.isOptSet("disableautocontrollers") && Program.SystemConfig["disableautocontrollers"] == "1")
-            {
-                if (SystemConfig.getOptBoolean("use_guns") && shooters.Contains(parentRom))
-                    ConfigureModel2Guns(ini, bytes, parentRom, true);
-
-                SimpleLogger.Instance.Info("[INFO] Auto controller configuration disabled.");
-                return;
-            }
-
             if (Program.SystemConfig.isOptSet("m2_joystick_autoconfig") && Program.SystemConfig["m2_joystick_autoconfig"] == "template")
                 return;
 
