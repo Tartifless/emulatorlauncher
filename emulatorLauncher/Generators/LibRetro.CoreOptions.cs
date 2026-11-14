@@ -6482,7 +6482,6 @@ namespace EmulatorLauncher.Libretro
                 bool c16 = system == "c16";
                 BindFeature(coreSettings, "vice_plus4_model", "vice_plus4_model", c16 ? "C16 PAL" : "PLUS4 PAL");
                 BindFeature(coreSettings, "vice_plus4_external_palette", "vice_plus4_external_palette", "colodore_ted");
-                BindBoolFeature(coreSettings, "vice_autoloadwarp", "vice_autoloadwarp", "enabled", "disabled");
             }
 
             // vice_x128 specific features
