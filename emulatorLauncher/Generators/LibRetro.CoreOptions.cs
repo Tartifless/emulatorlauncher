@@ -6440,6 +6440,23 @@ namespace EmulatorLauncher.Libretro
             BindFeature(coreSettings, "vice_crop_mode", "vice_crop_mode", "both");
             BindFeature(coreSettings, "vice_gfx_colors", "vice_gfx_colors", "16bit");
 
+            // JiffyDOS (x64, x64sc, x128): only enabled when its kernal and 1541 ROMs are in bios\vice
+            if (core == "vice_x64" || core == "vice_x64sc" || core == "vice_x128")
+            {
+                string viceBios = Path.Combine(AppConfig.GetFullPath("bios"), "vice");
+                var jiffyRoms = new List<string> { core == "vice_x128" ? "JiffyDOS_C128.bin" : "JiffyDOS_C64.bin", "JiffyDOS_1541-II.bin" };
+
+                // C64 mode of the C128 uses the C64 JiffyDOS kernal
+                if (core == "vice_x128" && SystemConfig.getOptBoolean("vice_c128_go64"))
+                    jiffyRoms.Add("JiffyDOS_C64.bin");
+
+                bool jiffyDos = SystemConfig.getOptBoolean("vice_jiffydos") && jiffyRoms.All(r => File.Exists(Path.Combine(viceBios, r)));
+                if (SystemConfig.getOptBoolean("vice_jiffydos") && !jiffyDos)
+                    SimpleLogger.Instance.Warning("[Generator] JiffyDOS ROMs missing in bios\\vice, JiffyDOS disabled.");
+
+                coreSettings["vice_jiffydos"] = jiffyDos ? "enabled" : "disabled";
+            }
+
             // vice_x64 specific features
             if (core == "vice_x64" || core == "vice_x64sc")
             {
