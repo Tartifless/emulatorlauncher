@@ -87,7 +87,7 @@ namespace EmulatorLauncher
                 try { dinputController = GameControllerDBParser.ParseByGuid(gamecontrollerDB, guid); }
                 catch { }
 
-                if (dinputController.ButtonMappings == null)
+                if (dinputController == null || dinputController.ButtonMappings == null)
                 {
                     SimpleLogger.Instance.Info("[INFO] Player " + ctrl.PlayerIndex + ". No button mapping in gamescontrollerDB file for : " + guid);
                     dinputController = null;
