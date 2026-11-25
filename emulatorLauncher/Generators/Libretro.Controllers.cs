@@ -324,7 +324,7 @@ namespace EmulatorLauncher.Libretro
 
             var hotKey = GetHotkeyInput(c0);
             if (hotKey != null && hotKey.Type != "key" && !_singleButtonShortcuts)
-                config[string.Format("input_enable_hotkey_{0}", typetoname[hotKey.Type])] = GetConfigValue(hotKey);
+                config[string.Format("input_enable_hotkey_{0}", typetoname[hotKey.Type])] = GetConfigValue(hotKey, c0);
 
             // Single button shortcuts: no hotkey at all, keyboard included
             if (_singleButtonShortcuts)
@@ -459,7 +459,7 @@ namespace EmulatorLauncher.Libretro
                     }
                 }
                 else
-                    config[string.Format("input_player{0}_{1}_{2}", controller.PlayerIndex, btnkey.Value, typetoname[input.Type])] = GetConfigValue(input);
+                    config[string.Format("input_player{0}_{1}_{2}", controller.PlayerIndex, btnkey.Value, typetoname[input.Type])] = GetConfigValue(input, controller);
             }
 
             foreach (var btnkey in retroarchdirs)
@@ -471,7 +471,7 @@ namespace EmulatorLauncher.Libretro
                 if (input.Type == "key")
                     config[string.Format("input_player{0}_{1}", controller.PlayerIndex, btnkey)] = GetConfigValue(input);
                 else
-                    config[string.Format("input_player{0}_{1}_{2}", controller.PlayerIndex, btnkey, typetoname[input.Type])] = GetConfigValue(input);
+                    config[string.Format("input_player{0}_{1}_{2}", controller.PlayerIndex, btnkey, typetoname[input.Type])] = GetConfigValue(input, controller);
             }
 
             foreach (var btnkey in retroarchjoysticks)
@@ -568,7 +568,7 @@ namespace EmulatorLauncher.Libretro
                             continue;
 
                         if (input.Type != "key")
-                            config[string.Format("input_{0}_{1}", specialkey.Value, typetoname[input.Type])] = GetConfigValue(input);
+                            config[string.Format("input_{0}_{1}", specialkey.Value, typetoname[input.Type])] = GetConfigValue(input, controller);
                     }
                 }
             }
@@ -697,7 +697,17 @@ namespace EmulatorLauncher.Libretro
 
         }
 
-        private static string GetConfigValue(Input input)
+        // Pad without SDL game controller mapping: RetroArch sdl2 driver opens it as a raw joystick
+        private static bool IsSdlRawJoystick(Controller controller)
+        {
+            if (controller == null || controller.IsKeyboard)
+                return false;
+
+            var sdl = controller.SdlController ?? SdlGameController.GetGameController(controller.Guid.ToGuid());
+            return sdl == null || string.IsNullOrEmpty(sdl.SdlBinding);
+        }
+
+        private static string GetConfigValue(Input input, Controller controller = null)
         {
             if (input.Type == "button")
                 return input.Id.ToString();
@@ -710,7 +720,8 @@ namespace EmulatorLauncher.Libretro
                     return "+" + input.Id.ToString();
             }
 
-            if (_inputDriver == "sdl2")
+            // Raw joysticks read hats as h0up/h0down..., game controllers as dpad buttons 11-14
+            if (_inputDriver == "sdl2" && !IsSdlRawJoystick(controller))
             {
                 if (input.Type == "hat")
                 {
@@ -726,7 +737,7 @@ namespace EmulatorLauncher.Libretro
             }
             else
             {
-                // xinput / directInput            
+                // xinput / directInput / sdl2 raw joystick
                 if (input.Type == "hat")
                 {
                     if (input.Value == 2) // SDL_HAT_RIGHT

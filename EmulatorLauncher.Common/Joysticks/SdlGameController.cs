@@ -728,6 +728,11 @@ namespace EmulatorLauncher.Common.Joysticks
                         SDL_SetHint("SDL_JOYSTICK_HIDAPI_PS3_SIXAXIS_DRIVER", "1");
                         break;
 
+                    case Sdl3HintProfile.Sdl3DefaultPs3:
+                        SDL_SetHint("SDL_JOYSTICK_HIDAPI_PS3", "1");
+                        SDL_SetHint("SDL_JOYSTICK_HIDAPI_PS3_SIXAXIS_DRIVER", "1");
+                        break;
+
                     case Sdl3HintProfile.Legacy:
                         SDL_SetHint("SDL_JOYSTICK_HIDAPI", "0");
                         SDL_SetHint("SDL_JOYSTICK_RAWINPUT", "0");
@@ -936,7 +941,8 @@ namespace EmulatorLauncher.Common.Joysticks
             RetroBat,       // HIDAPI=1, RAWINPUT=1, ENHANCED_REPORTS=0, COMBINE_JOY_CONS=1
             Legacy,         // HIDAPI=0, RAWINPUT=0, ENHANCED_REPORTS=0, COMBINE_JOY_CONS=1
             OpenGoal,       // SDL3 default + HIDAPI PS3 SIXAXIS driver (OpenGOAL gk.exe)
-            NoHidapi        // HIDAPI=0, RAWINPUT=0, ENHANCED_REPORTS=1, COMBINE_JOY_CONS=1
+            NoHidapi,       // HIDAPI=0, RAWINPUT=0, ENHANCED_REPORTS=1, COMBINE_JOY_CONS=1
+            Sdl3DefaultPs3  // SDL3 default + HIDAPI PS3 and PS3 SIXAXIS drivers (xbased)
         }
     }
 }
