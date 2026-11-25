@@ -10,7 +10,7 @@ using EmulatorLauncher.Common;
 namespace EmulatorLauncher
 {
     /// <summary>
-    /// xbased writes states\<TITLEID>.<version>\slot<N>.hxs (a .tmp file renamed when complete), then slot<N>.jpg.
+    /// xbased writes states\<TITLEID>.<version>\slot<N>.hxs (a .tmp file renamed when complete) and slot<N>.jpg.
     /// A state needs the blob store next to it (blobs\<hash>.gz: the game's cache drives), so the blobs are copied
     /// to the RetroBat folder too: a state chosen in EmulationStation is loaded from there with loadstate=.
     /// </summary>
@@ -18,7 +18,7 @@ namespace EmulatorLauncher
     {
         private static readonly Regex _stateRegex = new Regex(@"^([0-9A-F]{8}\.[0-9]+)\\slot([0-9]+)\.hxs$", RegexOptions.IgnoreCase);
 
-        // slot<N>.jpg is written after the state
+        // slot<N>.jpg is written along with the state (before or after it)
         private static readonly TimeSpan _pictureWait = TimeSpan.FromSeconds(5);
 
         private readonly string _romStem;
@@ -77,7 +77,7 @@ namespace EmulatorLauncher
                 if (info != null && !info.IsAutoSave)
                     destScreenShot = Path.Combine(SaveStatesPath, MakeFilename(_romStem, info.Slot, FileNameType.Image));
 
-                string picture = WaitForPicture(saveState, File.GetLastWriteTimeUtc(saveState));
+                string picture = WaitForPicture(saveState, File.GetLastWriteTimeUtc(saveState).AddSeconds(-10));
                 if (picture == null)
                     return;
 

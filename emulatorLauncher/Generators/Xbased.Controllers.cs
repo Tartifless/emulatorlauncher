@@ -11,7 +11,7 @@ namespace EmulatorLauncher
         private static readonly string[] _xbasedInputs =
         {
             "a", "b", "x", "y", "black", "white", "lt", "rt", "start", "back", "ls", "rs",
-            "up", "down", "left", "right", "lup", "ldown", "lleft", "lright", "rup", "rdown", "rleft", "rright"
+            "up", "down", "left", "right", "lup", "ldown", "lleft", "lright", "rup", "rdown", "rleft", "rright", "press"
         };
 
         /// <summary>
@@ -27,8 +27,8 @@ namespace EmulatorLauncher
                 return;
             }
 
-            // xbased sets no SDL joystick hint
-            Sdl3GameController.SetEnumerationHints(Sdl3GameController.Sdl3HintProfile.Sdl3Default);
+            // xbased enables SDL's PS3 drivers on Windows (DualShock 3 button pressure)
+            Sdl3GameController.SetEnumerationHints(Sdl3GameController.Sdl3HintProfile.Sdl3DefaultPs3);
 
             var sdl3 = Sdl3GameController.GetControllers();
             var xbasedOrder = sdl3.Where(c => c.IsGamepad).OrderBy(c => c.EnumerationIndex)
