@@ -22,7 +22,10 @@ namespace EmulatorLauncher
         private SaveStatesWatcher _saveStatesWatcher;
 
         // Games with an optional sound board, Gaelco games with a woofer ([sound.<game>] mode)
-        private static readonly string[] _optionSoundGames = { "pharrier", "sgnascar", "swracer", "atvtrack", "gfootbal", "smashdrv" };
+        private static readonly string[] _optionSoundGames = { "pharrier", "sgnascar", "swracer", "atvtrack", "gfootbal", "smashdrv", "footbpow14", "radikalb", "speedup", "surfplnt", "rollext" };
+
+        // Games keeping their learned control ranges ([players.<game>] keep_calibration)
+        private static readonly string[] _calibrationGames = { "atvtrack", "smashdrv", "speedup", "rollext" };
 
         public OdinGenerator()
         {
@@ -55,7 +58,7 @@ namespace EmulatorLauncher
             SetupSettings(path, system, fullscreen);
             SetupSaveStates(system, rom);
 
-            // Odin looks for the shared sets of the Hikaru games (hikaru, mie...) in the BIOS folder, then in the games folder (Gaelco games need none)
+            // Odin looks for the shared sets (hikaru, mie, tms320c31 / tms32031 for Gaelco 3D) in the BIOS folder, then in the games folder
             var commandArray = new List<string>
             {
                 "-R", "\"" + Path.GetDirectoryName(rom) + "\"",
@@ -124,6 +127,10 @@ namespace EmulatorLauncher
                 BindIniFeature(ini, "display", "filter", "odin_crt", "none");
                 ini.WriteValue("display", "unthrottled", "off");
 
+                // Gaelco 3D : interlaced fields and polygon edges above 1x
+                BindIniFeature(ini, "display", "gaelco3d_fields", "odin_gaelco3d_fields", "board");
+                BindIniFeature(ini, "display", "gaelco3d_edges", "odin_gaelco3d_edges", "fine");
+
                 SetupBezel(ini);
 
                 // The sections of a version itself (written by an older RetroBat) would be read after the parent's ones
@@ -139,6 +146,18 @@ namespace EmulatorLauncher
                     ini.WriteValue(soundSection, "mode", SystemConfig["odin_soundmode"]);
                 else
                     ini.Remove(soundSection, "mode");
+
+                // Speed Up : lows of the seat woofer
+                if (_section == "speedup" && SystemConfig.isOptSet("odin_woofer_cutoff") && !string.IsNullOrEmpty(SystemConfig["odin_woofer_cutoff"]))
+                    ini.WriteValue(soundSection, "woofer_cutoff", SystemConfig["odin_woofer_cutoff"]);
+                else
+                    ini.Remove(soundSection, "woofer_cutoff");
+
+                // Wheel, pedal or handlebar ranges learned last time (experimental), the cabinet relearns them at each power-on
+                if (_calibrationGames.Contains(_section) && SystemConfig.getOptBoolean("odin_keep_calibration"))
+                    ini.WriteValue("players." + _section, "keep_calibration", "on");
+                else
+                    ini.Remove("players." + _section, "keep_calibration");
 
                 // Light guns, wheel and controllers
                 SetupGuns(ini);

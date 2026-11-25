@@ -14,15 +14,20 @@ namespace EmulatorLauncher
         private class WheelControls
         {
             public string Steering, Gas, Brake, GearUp, GearDown, View, Start;
-            public bool BrakeIsButton;
+            public bool GasIsButton, BrakeIsButton;
         }
 
         // Games played with a wheel (parent sets, the versions share their controls)
+        // Rolling Extreme : the brakes on the pedals and the paddles, as its sit-down cabinet
         private static readonly Dictionary<string, WheelControls> _wheelControls = new Dictionary<string, WheelControls>()
         {
             { "sgnascar", new WheelControls { Steering = "steering_wheel", Gas = "gas_pedal", Brake = "brake_pedal", GearUp = "gear_up", GearDown = "gear_down", View = "view_change", Start = "start" } },
             { "atvtrack", new WheelControls { Steering = "handlebar", Gas = "throttle", Brake = "right_brake", BrakeIsButton = true, GearUp = "right_brake", GearDown = "left_brake", Start = "start" } },
             { "smashdrv", new WheelControls { Steering = "wheel", Gas = "gas_pedal", Brake = "brake_pedal", Start = "horn" } },
+            { "speedup", new WheelControls { Steering = "wheel", Gas = "gas_pedal", Brake = "brake_pedal", BrakeIsButton = true, GearUp = "gear_up", GearDown = "gear_down", View = "view", Start = "start" } },
+            { "radikalb", new WheelControls { Steering = "handlebar", Gas = "accelerator", GasIsButton = true, Brake = "brake", BrakeIsButton = true, View = "view", Start = "start" } },
+            { "rollext", new WheelControls { Steering = "handlebar", Gas = "right_brake", GasIsButton = true, Brake = "left_brake", BrakeIsButton = true, GearUp = "right_brake", GearDown = "left_brake", View = "view", Start = "start" } },
+            { "surfplnt", new WheelControls { Steering = "joystick", Start = "start" } },
         };
 
         // The Model 3 wheel mapping (DirectInput names) has the same controls as NASCAR Arcade
@@ -145,7 +150,7 @@ namespace EmulatorLauncher
             AddLineInput(lines, controls.Steering, steering ?? "joy:axis0");
 
             // Pedals : whole axis, Odin reads the side from where the pedal rests (:invert picks the low half when both pedals share one axis)
-            AddWheelInput(lines, controls.Gas, ConvertWheelAxis(GetWheelValue(buttons, "InputAccelerator"), axes, true));
+            AddWheelInput(lines, controls.Gas, ConvertWheelAxis(GetWheelValue(buttons, "InputAccelerator"), axes, true, controls.GasIsButton));
 
             // A brake button of the game (ATV Track) is pressed from half the pedal's way
             AddWheelInput(lines, controls.Brake, ConvertWheelAxis(GetWheelValue(buttons, "InputBrake"), axes, true, controls.BrakeIsButton));

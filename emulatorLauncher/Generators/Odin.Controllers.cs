@@ -93,6 +93,15 @@ namespace EmulatorLauncher
             { "2p_kick_x", "" }, { "2p_kick_y", "" },
             // smashdrv, smashdrvb, smashdrvs
             { "wheel", "" }, { "horn", "key:1" }, { "volume_up", "key:=" }, { "volume_down", "key:-" },
+            // radikalb, speedup, surfplnt, rollext (handlebar, wheel, gas_pedal, brake_pedal, gears, brakes : above)
+            { "accelerator", "key:Up" }, { "handle_up", "key:Left Ctrl" }, { "view", "key:Left Shift" },
+            { "joystick", "" }, { "left_smash", "key:A" }, { "right_smash", "key:S" },
+        };
+
+        // Keys of a control id that another game uses with other keys (<game>.<id>)
+        private static readonly Dictionary<string, string> _gameKeyboardInputs = new Dictionary<string, string>()
+        {
+            { "radikalb.brake", "key:Down" },     // swracer : key:X
         };
 
         private enum OdinDevice { None, Keyboard, Pad, Joystick }
@@ -120,8 +129,8 @@ namespace EmulatorLauncher
             var lines = new Dictionary<string, List<string>>();
             var wheel = GetWheelController();
 
-            // Brave Firefighters and Gaelco Football have two players on one cabinet, the other games are linked cabinets
-            int players = _game == "braveff" || _game == "gfootbal" ? 2 : 1;
+            // Brave Firefighters, Gaelco Football and Football Power have two players on one cabinet, the other games are linked cabinets
+            int players = _section == "braveff" || _section == "gfootbal" || _section == "footbpow14" ? 2 : 1;
 
             for (int player = 1; player <= 2; player++)
             {
@@ -182,7 +191,8 @@ namespace EmulatorLauncher
                 var inputs = new List<string>();
 
                 string keys;
-                _keyboardInputs.TryGetValue(line.Key, out keys);
+                if (!_gameKeyboardInputs.TryGetValue(_section + "." + line.Key, out keys))
+                    _keyboardInputs.TryGetValue(line.Key, out keys);
                 keys = GetGunInputs(line.Key, keys);
 
                 if (!string.IsNullOrEmpty(keys))
@@ -392,6 +402,7 @@ namespace EmulatorLauncher
         }
 
         // Versions of a game sharing the controls and the odin.ini sections of their parent (odin-games.json)
+        // Football Power : Odin's game is footbpow14, footbpow (the prototype MAME takes as parent) is one of its versions
         private static readonly Dictionary<string, string> _parents = new Dictionary<string, string>()
         {
             { "airtrixo", "airtrix" },
@@ -399,6 +410,21 @@ namespace EmulatorLauncher
             { "atvtracka", "atvtrack" },
             { "smashdrvb", "smashdrv" },
             { "smashdrvs", "smashdrv" },
+            { "radikalba", "radikalb" },
+            { "footbpow", "footbpow14" },
+            { "footbpow12", "footbpow14" },
+            { "footbpow11", "footbpow14" },
+            { "speedup21", "speedup" },
+            { "speedup20", "speedup" },
+            { "speedup20a", "speedup" },
+            { "speedup12", "speedup" },
+            { "speedup10", "speedup" },
+            { "surfplnt40", "surfplnt" },
+            { "surfplnt31", "surfplnt" },
+            { "surfplnt30", "surfplnt" },
+            { "surfplnt20", "surfplnt" },
+            { "surfplnt12", "surfplnt" },
+            { "surfplnt10", "surfplnt" },
         };
     }
 }
