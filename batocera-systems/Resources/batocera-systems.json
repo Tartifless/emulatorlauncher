@@ -555,6 +555,26 @@
       },
       {
         "md5": "",
+        "file": "bios/pom2/disk2_13.rom",
+        "optional": true
+      },
+      {
+        "md5": "",
+        "file": "bios/pom2/diskii_p6_13.rom",
+        "optional": true
+      },
+      {
+        "md5": "",
+        "file": "bios/pom2/mouse_341-0270-c.bin",
+        "optional": true
+      },
+      {
+        "md5": "",
+        "file": "bios/pom2/mouse_341-0269.bin",
+        "optional": true
+      },
+      {
+        "md5": "",
         "file": "bios/mame/hash/apple2_cass.xml",
         "optional": true
       },
@@ -1475,6 +1495,36 @@
       {
         "md5": "",
         "file": "bios/fmtmarty.zip",
+        "optional": true
+      }
+    ]
+  },
+
+  "gaelco": {
+    "name": "Gaelco",
+    "biosFiles": [
+      {
+        "md5": "",
+        "file": "bios/tms32031.zip",
+        "group": "tms32031",
+        "optional": true
+      },
+      {
+        "md5": "",
+        "file": "bios/tms320c31.zip",
+        "group": "tms32031",
+        "optional": true
+      },
+      {
+        "md5": "",
+        "file": "roms/gaelco/tms32031.zip",
+        "group": "tms32031",
+        "optional": true
+      },
+      {
+        "md5": "",
+        "file": "roms/gaelco/tms320c31.zip",
+        "group": "tms32031",
         "optional": true
       }
     ]
@@ -3022,6 +3072,20 @@
         "md5": "",
         "file": "bios/st018.rom",
         "optional": true
+      }
+    ]
+  },
+
+  "studio2": {
+    "name": "Studio II",
+    "biosFiles": [
+      {
+        "md5": "",
+        "file": "bios/studio2.zip"
+      },
+      {
+        "md5": "",
+        "file": "bios/mame/hash/studio2.xml"
       }
     ]
   },

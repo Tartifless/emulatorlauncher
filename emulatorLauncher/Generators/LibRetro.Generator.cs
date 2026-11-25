@@ -2818,7 +2818,7 @@ namespace EmulatorLauncher.Libretro
 
         // Hardware-rendered cores: a duplicated instance cannot get a second GPU context
         static List<string> coreNoSecondInstance = new List<string>() { "mednafen_psx_hw", "melonds", "vircon32" };
-        
+
         static readonly List<string> CoreSaveSort = new List<string>() { "dolphin" };
         static readonly List<string> CoreNoZip = new List<string>() { "mednafen_pce", "mednafen_pce_fast", "mednafen_psx_hw", "mednafen_psx", "mednafen_saturn", "swanstation", 
             "pcsx_rearmed", "pcsx2", "virtualjaguar", "zc255" };

@@ -49,24 +49,23 @@ namespace EmulatorLauncher
 
             bool fullscreen = ShouldRunFullscreen();
 
-            // POM2 does not read archives, it classifies images by extension and content
+            // POM2 opens a .zip itself, but into its own media cache : RetroBat extracts the archive
+            // so that the working copies stay in the saves folder (and so that .7z works too)
+            List<string> disks = null;
             string romExtension = Path.GetExtension(rom).ToLowerInvariant();
             if (romExtension == ".zip" || romExtension == ".7z" || romExtension == ".squashfs")
             {
                 string uncompressedRomPath = this.TryUnZipGameIfNeeded(system, rom, false, false);
                 if (Directory.Exists(uncompressedRomPath))
                 {
-                    string[] romFiles = Directory.GetFiles(uncompressedRomPath, "*.*", SearchOption.AllDirectories)
-                        .OrderBy(file => Array.IndexOf(_diskExtensions, Path.GetExtension(file).ToLowerInvariant()))
-                        .ToArray();
-
-                    rom = romFiles.FirstOrDefault(file => _diskExtensions.Any(ext => Path.GetExtension(file).Equals(ext, StringComparison.OrdinalIgnoreCase)));
+                    disks = GetArchiveDiskFiles(uncompressedRomPath);
                     ValidateUncompressedGame();
                 }
             }
 
-            // POM2 mounts a single positional image : CliDispatcher.cpp rejects a second one
-            var disks = GetGameDiskFiles(rom);
+            if (disks == null)
+                disks = GetGameDiskFiles(rom);
+
             if (disks.Count == 0)
                 throw new ApplicationException("No Apple II disk image found in " + Path.GetFileName(rom));
 
@@ -77,18 +76,34 @@ namespace EmulatorLauncher
             if (discNumber < 0 || discNumber >= disks.Count)
                 discNumber = 0;
 
-            rom = disks[discNumber];
+            if (!File.Exists(disks[discNumber]))
+                throw new ApplicationException("File '" + disks[discNumber] + "' does not exist");
 
-            if (!File.Exists(rom))
-                throw new ApplicationException("File '" + rom + "' does not exist");
-
-            if (disks.Count > 1)
-                SimpleLogger.Instance.Info("[Generator] POM2 mounts one image at a time, booting '" + Path.GetFileName(rom) + "' - swap from the in-game disk menu.");
-
+            // Every disk of the game gets its working copy, side by side in the saves folder : the kiosk
+            // disk menu (Start, or F1) lists the booted disk's folder, the game's other disks first.
             // POM2 reads the file's read-only attribute as the write-protect notch (MediaNotch.h),
             // so the working copy carries the protection, exactly like AppleWin.
-            bool diskWritable;
-            rom = ResolveDiskWorkingCopy(system, emulator, rom, out diskWritable, true);
+            bool diskWritable = true;
+            for (int i = 0; i < disks.Count; i++)
+            {
+                if (!File.Exists(disks[i]))
+                {
+                    SimpleLogger.Instance.Warning("[Generator] POM2 disk not found : " + disks[i]);
+                    continue;
+                }
+
+                bool writable;
+                disks[i] = ResolveDiskWorkingCopy(system, emulator, disks[i], out writable, true);
+                diskWritable &= writable;
+            }
+
+            rom = disks[discNumber];
+
+            // Disk II drive 2 : the game's next disk, like AppleWin. Only a 5.25" image fits a Disk II drive
+            string drive2Disk = null;
+            bool useDrive2 = !SystemConfig.isOptSet("pom2_drive2") || SystemConfig.getOptBoolean("pom2_drive2");
+            if (useDrive2 && discNumber + 1 < disks.Count && IsFloppy525(disks[discNumber + 1]))
+                drive2Disk = disks[discNumber + 1];
 
             // Portable configuration : mirrors ResourcePaths.cpp userConfigDir(), <APPDATA>\POM2
             string configPath = Path.Combine(path, "POM2");
@@ -107,7 +122,14 @@ namespace EmulatorLauncher
             if (fullscreen)
                 commandArray.Add("--kiosk");
 
-            // The positional image must stay last : the first non-flag argument is the boot disk
+            // Inserted without booting, a refused image is only a warning (CliDispatcher.cpp, main.cpp)
+            if (drive2Disk != null)
+            {
+                commandArray.Add("--mount");
+                commandArray.Add("\"s6d2:" + drive2Disk + "\"");
+            }
+
+            // The positional image is the boot disk : POM2 accepts only one (CliDispatcher.cpp)
             commandArray.Add("\"" + rom + "\"");
 
             string args = string.Join(" ", commandArray);
@@ -134,6 +156,42 @@ namespace EmulatorLauncher
             return ret;
         }
 
+        /// <summary>
+        /// Disks of an extracted archive : its own .m3u when it has one, otherwise every disk image in name
+        /// order (a game's sides). The same disk in two formats is kept once, in the _diskExtensions order.
+        /// </summary>
+        private static List<string> GetArchiveDiskFiles(string folder)
+        {
+            var files = Directory.GetFiles(folder, "*.*", SearchOption.AllDirectories);
+
+            string m3u = files.FirstOrDefault(file => Path.GetExtension(file).Equals(".m3u", StringComparison.OrdinalIgnoreCase));
+            if (m3u != null)
+                return GetGameDiskFiles(m3u);
+
+            return files
+                .Where(file => _diskExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
+                .GroupBy(file => Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)), StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.OrderBy(file => Array.IndexOf(_diskExtensions, Path.GetExtension(file).ToLowerInvariant())).First())
+                .OrderBy(file => Path.GetFileName(file), StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        /// <summary>5.25" images, the only ones a Disk II drive takes. A .po or .2mg can also be a 3.5" or a hard disk.</summary>
+        private static bool IsFloppy525(string file)
+        {
+            if (!File.Exists(file))
+                return false;
+
+            string ext = Path.GetExtension(file).ToLowerInvariant();
+            if (ext == ".dsk" || ext == ".do" || ext == ".nib" || ext == ".woz" || ext == ".d13")
+                return true;
+
+            if (ext == ".po" || ext == ".2mg")
+                return new FileInfo(file).Length < 400 * 1024;
+
+            return false;
+        }
+
         // ROMs searched by POM2 for each machine, machine then character ROM, the first file found is used (SystemProfile.cpp)
         private static readonly Dictionary<string, string[][]> _machineRoms = new Dictionary<string, string[][]>()
         {
@@ -147,7 +205,7 @@ namespace EmulatorLauncher
 
         /// <summary>
         /// POM2 packages ship no Apple ROM since 1.1.0 : the ROMs of 'bios\pom2' are copied to the 'roms' folder beside POM2.exe
-        /// (searched after %LOCALAPPDATA%\POM2\roms, ResourcePaths.cpp). A missing machine or Disk II ROM stops the launch with a message,
+        /// (searched after %LOCALAPPDATA%\POM2\roms, ResourcePaths.cpp). A missing machine or character ROM stops the launch with a message,
         /// in kiosk mode POM2 would only show a blank screen.
         /// </summary>
         private void SetupRoms(string path, string machine)
@@ -175,13 +233,8 @@ namespace EmulatorLauncher
             if (!_machineRoms.TryGetValue(baseMachine, out machineRoms))
                 return;
 
-            // Disk II sequencer on every machine, Disk II boot PROM except on the //c (in its system ROM)
-            var required = machineRoms.ToList();
-            required.Add(new[] { "diskii_p6.rom" });
-            if (!baseMachine.StartsWith("iic"))
-                required.Add(new[] { "disk2.rom" });
-
-            var missing = required.Where(group => !group.Any(file => RomExists(path, file))).Select(group => group[0]).ToList();
+            // The Disk II PROMs are optional : without them POM2 runs its own 16 and 13-sector ones (SlotCardFactory.cpp)
+            var missing = machineRoms.Where(group => !group.Any(file => RomExists(path, file))).Select(group => group[0]).ToList();
             if (missing.Count > 0)
                 throw new ApplicationException("Missing POM2 ROM in bios\\pom2 : " + string.Join(", ", missing));
         }

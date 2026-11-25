@@ -220,6 +220,7 @@ namespace EmulatorLauncher.Libretro
                 { "playdiaemu", "PlaydiaEmu" },
                 { "pocketcdg", "pocketcdg" },
                 { "pokemini", "PokeMini" },
+                { "pom2", "POM2" },
                 { "potator", "Potator" },
                 { "ppsspp", "PPSSPP" },
                 { "prboom", "PrBoom" },
@@ -472,6 +473,7 @@ namespace EmulatorLauncher.Libretro
             ConfigurePlaydiaEmu(retroarchConfig, coreSettings, system, core);
             ConfigurePocketCDG(retroarchConfig, coreSettings, system, core);
             ConfigurePokeMini(retroarchConfig, coreSettings, system, core);
+            ConfigurePom2(retroarchConfig, coreSettings, system, core);
             ConfigurePotator(retroarchConfig, coreSettings, system, core);
             ConfigurePpsspp(retroarchConfig, coreSettings, system, core);
             ConfigurePrBoom(retroarchConfig, coreSettings, system, core);
@@ -5726,6 +5728,112 @@ namespace EmulatorLauncher.Libretro
                         break;
                 }
             }
+        }
+
+        private void ConfigurePom2(ConfigFile retroarchConfig, ConfigFile coreSettings, string system, string core)
+        {
+            if (core != "pom2")
+                return;
+
+            // System. Feature values are prefixed 'pom2lr_' : the standalone uses other values under 'pom2_' names
+            BindFeature(coreSettings, "pom2_machine", "pom2lr_machine", "auto");
+            BindFeature(coreSettings, "pom2_video_standard", "pom2lr_video_standard", "auto");
+            BindFeature(coreSettings, "pom2_ramworks", "pom2lr_ramworks", "64k");
+
+            // Disks
+            BindBoolFeatureOn(coreSettings, "pom2_fast_disk_loading", "pom2lr_diskturbo", "enabled", "disabled");
+            BindBoolFeatureOn(coreSettings, "pom2_drive2", "pom2lr_drive2", "next", "empty");
+            BindFeature(coreSettings, "pom2_disk_control_drive", "pom2lr_disk_control_drive", "1");
+
+            // Shared 'disk_write' option. The core option asks for write PROTECTION : with protection off
+            // the core runs the game from its own private copy, the romset is never modified
+            string diskWrite = GetDiskWriteMode();
+            coreSettings["pom2_write_protect"] = (diskWrite == "1" || diskWrite == "reset") ? "disabled" : "enabled";
+            ResetPom2DiskCopies(system, SystemConfig["rom"]);
+
+            // Expansion cards
+            BindFeature(coreSettings, "pom2_mockingboard", "pom2lr_mockingboard", "ac");
+            BindBoolFeature(coreSettings, "pom2_mouse", "pom2lr_mouse", "enabled", "disabled");
+
+            // Video
+            BindFeature(coreSettings, "pom2_display", "pom2lr_display", "auto");
+
+            // Audio. The drive samples are read from 'bios\pom2\floppy_samples'
+            BindBoolFeature(coreSettings, "pom2_drive_sounds", "pom2lr_drive_sounds", "enabled", "disabled");
+
+            // Input
+            BindFeature(coreSettings, "pom2_paddle_deadzone", "pom2lr_deadzone", "12.5%");
+            BindBoolFeatureOn(coreSettings, "pom2_pad_profile", "pom2lr_pad_profile", "auto", "disabled");
+            BindFeature(retroarchConfig, "input_libretro_device_p1", "pom2lr_controller1", "1");
+
+            // Netplay only sends the keyboard and the mouse of the ports set to them (port 3 keyboard, US layout, port 4 mouse).
+            // Played alone, the typed characters follow the user's own layout and the mouse is read with port 1
+            bool netplay = !string.IsNullOrEmpty(SystemConfig["netplaymode"]);
+            retroarchConfig["input_libretro_device_p3"] = netplay ? "3" : "0";
+            retroarchConfig["input_libretro_device_p4"] = netplay ? "2" : "0";
+            if (netplay)
+                retroarchConfig["input_player4_mouse_index"] = "0";
+        }
+
+        /// <summary>
+        /// 'YES AND RESET THE DISK' for the POM2 core. Its private copies of a game are in 'saves\system\pom2\disks\game',
+        /// game being the content's file name without extension (the .m3u, the disk or the zip) made portable by POM2
+        /// (libretro/disk_storage.cpp, portable_name.cpp) : the folder is kept as '.bak'.
+        /// </summary>
+        private void ResetPom2DiskCopies(string system, string rom)
+        {
+            if (GetDiskWriteMode() != "reset" || string.IsNullOrEmpty(rom))
+                return;
+
+            string disksPath = Path.Combine(AppConfig.GetFullPath("saves"), system, "pom2", "disks");
+            if (!Directory.Exists(disksPath))
+                return;
+
+            string game = Path.GetFileNameWithoutExtension(rom);
+
+            // A name POM2 had to change (accents, other characters, length) ends with ' [first 8 chars of its SHA-256]'
+            var folders = new List<string>();
+            if (IsPom2PortableName(game))
+                folders.Add(Path.Combine(disksPath, game));
+            else
+                folders.AddRange(Directory.GetDirectories(disksPath, "* [" + Pom2Sha256(game.Normalize(NormalizationForm.FormC)).Substring(0, 8) + "]"));
+
+            foreach (string folder in folders.Where(f => Directory.Exists(f)))
+            {
+                try
+                {
+                    string backup = folder + ".bak";
+                    if (Directory.Exists(backup))
+                        Directory.Delete(backup, true);
+
+                    Directory.Move(folder, backup);
+                    SimpleLogger.Instance.Info("[Generator] Disk reset : POM2 copies of " + game + " kept as " + Path.GetFileName(backup));
+                }
+                catch (Exception ex) { SimpleLogger.Instance.Warning("[Generator] POM2 disk reset failed : " + ex.Message); }
+            }
+        }
+
+        private static readonly string[] _windowsDeviceNames = new string[] { "CON", "PRN", "AUX", "NUL",
+            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9" };
+
+        /// <summary>A name POM2 keeps as it is : printable ASCII, none of &lt;&gt;:"/\|?*, no trailing dot or space, 64 chars at most, no device name.</summary>
+        private static bool IsPom2PortableName(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name.Length > 64 || name.EndsWith(".") || name.EndsWith(" "))
+                return false;
+
+            if (name.Any(c => c < 0x20 || c >= 0x7f || "<>:\"/\\|?*".IndexOf(c) >= 0))
+                return false;
+
+            string device = name.Split('.')[0].TrimEnd(' ').ToUpperInvariant();
+            return !_windowsDeviceNames.Contains(device);
+        }
+
+        private static string Pom2Sha256(string text)
+        {
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+                return string.Concat(sha.ComputeHash(Encoding.UTF8.GetBytes(text)).Select(b => b.ToString("x2")));
         }
 
         private void ConfigurePotator(ConfigFile retroarchConfig, ConfigFile coreSettings, string system, string core)
