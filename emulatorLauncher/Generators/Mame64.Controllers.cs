@@ -27,6 +27,7 @@ namespace EmulatorLauncher
                 { "crvision", "crvision"},
                 { "gamecom", "gamecom"},
                 { "supracan", "supracan"},
+                { "studio2", "studio2"},
                 { "fmtowns", "fmtowns"},
                 { "fmtownsux", "fmtownsux"},
                 { "fmtmarty", "fmtmarty"}
@@ -473,7 +474,7 @@ namespace EmulatorLauncher
                         port.Add(buttonMap);
                     }
 
-                    input.Add(port);
+                    AddOrMergePort(input, port);
                 }
 
                 stop = true;
@@ -681,7 +682,7 @@ namespace EmulatorLauncher
                         port.Add(buttonMap);
                     }
 
-                    input.Add(port);
+                    AddOrMergePort(input, port);
                 }
 
                 stop = true;
@@ -835,7 +836,8 @@ namespace EmulatorLauncher
                 foreach (var button in _gameLayout.Buttons)
                 {
                     string player = button.Player;
-                    if (player != null && player == "1")
+                    // A button tied to a player only goes to that player
+                    if (player != null && player != i.ToString())
                         continue;
                     if (button.Type.Contains("P1_"))
                         continue;
@@ -882,7 +884,7 @@ namespace EmulatorLauncher
                         port.Add(buttonMap);
                     }
 
-                    input.Add(port); 
+                    AddOrMergePort(input, port);
                 }
 
                 AddPort(input, $"P{i}_START", joy + mapping["start"]);
@@ -1033,7 +1035,8 @@ namespace EmulatorLauncher
                 foreach (var button in _gameLayout.Buttons)
                 {
                     string player = button.Player;
-                    if (player != null && player == "1")
+                    // A button tied to a player only goes to that player
+                    if (player != null && player != i.ToString())
                         continue;
                     if (button.Type.Contains("P1_"))
                         continue;
@@ -1081,7 +1084,7 @@ namespace EmulatorLauncher
                         port.Add(buttonMap);
                     }
 
-                    input.Add(port);
+                    AddOrMergePort(input, port);
                 }
 
                 AddPort(input, $"P{i}_START", joy + GetDinputMapping(ctrlr, "start", xinputCtrl));
@@ -1304,6 +1307,49 @@ namespace EmulatorLauncher
                 port.Add(new XElement("newseq", new XAttribute("type", "decrement"), decrement));
 
             input.Add(port);
+        }
+
+        // Same MAME port mapped on several controllers (ie a keypad shared between players): merge the sequences
+        private static void AddOrMergePort(XElement input, XElement port)
+        {
+            var existing = port.Attribute("tag") == null ? null : input.Elements("port").FirstOrDefault(p =>
+                (string)p.Attribute("type") == (string)port.Attribute("type") &&
+                (string)p.Attribute("tag") == (string)port.Attribute("tag") &&
+                (string)p.Attribute("mask") == (string)port.Attribute("mask"));
+
+            if (existing == null)
+            {
+                input.Add(port);
+                return;
+            }
+
+            foreach (var seq in port.Elements("newseq"))
+            {
+                var current = existing.Elements("newseq").FirstOrDefault(s => (string)s.Attribute("type") == (string)seq.Attribute("type"));
+                if (current == null)
+                {
+                    existing.Add(new XElement(seq));
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(seq.Value) || seq.Value == "NONE")
+                    continue;
+
+                if (string.IsNullOrEmpty(current.Value) || current.Value == "NONE")
+                {
+                    current.Value = seq.Value;
+                    continue;
+                }
+
+                var parts = current.Value.Split(new[] { " OR " }, StringSplitOptions.None).ToList();
+                foreach (var part in seq.Value.Split(new[] { " OR " }, StringSplitOptions.None))
+                {
+                    if (!parts.Contains(part))
+                        parts.Add(part);
+                }
+
+                current.Value = string.Join(" OR ", parts);
+            }
         }
 
         private string GetDinputMapping(SdlToDirectInput c, string buttonkey, bool isXinput, int axisDirection = 0)

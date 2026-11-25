@@ -353,6 +353,7 @@ namespace EmulatorLauncher
             new MessSystem("vc4000"       ,"vc4000"        , "cart"  ),     // Interton VC 4000
             new MessSystem("pegasus"      ,"pegasus"       , "rom1"  ),     // Amber Pegasus
             new MessSystem("pegasus"      ,"pegasusm"     , "rom1"  ),      // Amber Pegasus (memory expansion)
+            new MessSystem("studio2"      ,"studio2"       , "cart"  ){ UseFileNameWithoutExtension = true },     // RCA Studio II
 
             // NOT IN RETROBAT
             new MessSystem("x1"           ,"x1" , new MessRomType[] 
@@ -446,7 +447,6 @@ namespace EmulatorLauncher
             new MessSystem("pc6001"       ,"pc6001mk2"     , "cart2"  ), // NEC PC-6001
             new MessSystem("p2000t"       ,"p2000t"     , "cass"  ), // Philips P2000T
             new MessSystem("radio86"      ,"radio86"     , "cass"  ), // Radio-86RK Partner-01.01
-            new MessSystem("studio2"      ,"studio2"     , "cart"  ), // RCA Studio II
             new MessSystem("svmu"         ,"svmu"     , "quik"  ), // Sega Visual Memory Unit
             new MessSystem("mz2500"       ,"mz2500"     , "flop1"  ), // Sharp MZ-2500
             new MessSystem("mz700"        ,"mz700"     , "cass"  ), // Sharp MZ-700
@@ -1025,6 +1025,10 @@ namespace EmulatorLauncher
             // Specific cases for some systems
             // Disable softlist for .rpk extension with ti99
             if (system == "ti99" && rom.EndsWith(".rpk"))
+                UseFileNameWithoutExtension = false;
+
+            // studio2: MAME romsets (zip/7z) go through the software list, loose dumps (.st2, .bin, .rom) are passed with their full path
+            if (system == "studio2" && !rom.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase) && !rom.EndsWith(".7z", StringComparison.InvariantCultureIgnoreCase))
                 UseFileNameWithoutExtension = false;
 
             // xegs software list only holds cartridges : disks are passed with their full path
