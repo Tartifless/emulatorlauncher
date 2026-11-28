@@ -90,21 +90,27 @@ namespace EmulatorLauncher
             if (!File.Exists(portableFile))
                 File.WriteAllText(portableFile, "");
 
-            // Manage case where rom is a folder
+            // Manage case where rom is a folder (e.g. "Game.xex" extracted folder): default.xex at root, then iso, then default.xex in a subfolder
             if (Directory.Exists(rom))
             {
-                rom = Directory.GetFiles(rom, "*.*", SearchOption.AllDirectories)
-                   .FirstOrDefault(f =>
-                       string.Equals(Path.GetExtension(f), ".iso", StringComparison.OrdinalIgnoreCase));
+                string folder = rom;
+
+                rom = Directory.GetFiles(folder, "default.xex", SearchOption.TopDirectoryOnly).FirstOrDefault();
 
                 if (rom == null)
-                {
-                    throw new ApplicationException("Unable to find any iso file in the folder");
-                }
+                    rom = Directory.GetFiles(folder, "*.iso", SearchOption.AllDirectories).FirstOrDefault();
+
+                if (rom == null)
+                    rom = Directory.GetFiles(folder, "default.xex", SearchOption.AllDirectories).OrderBy(f => f.Length).FirstOrDefault();
+
+                if (rom == null)
+                    throw new ApplicationException("Unable to find default.xex or iso file in the folder");
+
+                SimpleLogger.Instance.Info("[INFO] Game folder, launching : " + rom);
             }
 
             string romdir = Path.GetDirectoryName(rom);
-            
+
             if (Path.GetExtension(rom).ToLower() == ".m3u" || Path.GetExtension(rom).ToLower() == ".xbox360")
             {
                 SimpleLogger.Instance.Info("[INFO] game file is .m3u, reading content of file.");
@@ -916,10 +922,21 @@ namespace EmulatorLauncher
                 return false;
             }
 
-            string searchLocation = Path.GetFileName(rom);
+            var candidates = games?.Where(game => game.FileLocations != null && !string.IsNullOrEmpty(game.FileLocations.GameLocation)).ToList();
+            if (candidates == null || candidates.Count == 0)
+                return false;
 
-            XeniaManagerGame foundGame = games?.Find(game => game.FileLocations != null && !string.IsNullOrEmpty(game.FileLocations.GameLocation) &&
-                string.Equals(Path.GetFileName(game.FileLocations.GameLocation), searchLocation, StringComparison.OrdinalIgnoreCase));
+            // Full path first: extracted games all share the default.xex file name
+            XeniaManagerGame foundGame = candidates.FirstOrDefault(game => IsSamePath(game.FileLocations.GameLocation, rom));
+
+            // File name fallback (roms folder moved), only when it is unambiguous
+            if (foundGame == null)
+            {
+                string searchLocation = Path.GetFileName(rom);
+                var byName = candidates.Where(game => string.Equals(Path.GetFileName(game.FileLocations.GameLocation), searchLocation, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (byName.Count == 1)
+                    foundGame = byName[0];
+            }
 
             if (foundGame == null)
                 return false;
@@ -943,6 +960,18 @@ namespace EmulatorLauncher
             _xeniaManagerConfigFile = cfgFile;
             SimpleLogger.Instance.Info("[INFO] Using config file: " + cfgFile);
             return true;
+        }
+
+        private static bool IsSamePath(string path1, string path2)
+        {
+            try
+            {
+                return string.Equals(Path.GetFullPath(path1).TrimEnd('\\'), Path.GetFullPath(path2).TrimEnd('\\'), StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void SetupXConfig(string xeniaPath)
